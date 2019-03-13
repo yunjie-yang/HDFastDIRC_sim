@@ -44,12 +44,12 @@ libs: $(OBJFILES)
 
 .PHONY : clean
 clean:
-	rm lib/*.o
+	rm -f lib/*.o
 	rm -f $(OUT)
 	
 .PHONY : cleanall
 cleanall:
-	rm lib/*
-	rm *.gcda
+	rm -f lib/*
+	rm -f *.gcda
 	rm -f $(OUT)
 	
