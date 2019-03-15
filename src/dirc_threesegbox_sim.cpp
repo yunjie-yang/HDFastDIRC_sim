@@ -6,14 +6,12 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
-//
 #include <stdlib.h>
 #include <math.h>
 
 #include <TRandom3.h>
 
-//#define EXACT_GEANT_ADJUST
-
+//#define rad2deg 57.2958
 
 DircThreeSegBoxSim::DircThreeSegBoxSim(
 		int rand_seed /*=4357*/,\
@@ -32,8 +30,6 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 				ibar_width,\
 				ibar_depth) {
 
-	printf("BarLWD: %12.04f %12.04f %12.04f\n",barLength,barWidth,barDepth);
-
 	foc_r = ifoc_r;
 	foc_mirror_size = ifoc_mirror_size;
 	foc_rot = ifoc_rot;
@@ -41,7 +37,6 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	sens_size = isens_size;
 	sens_rot = isens_rot;
 
-//	printf("%12.04f\n",sens_rot);
 
 	storeOpticalAngles = false;
 
@@ -150,6 +145,85 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	set_focmirror_nonuniformity(0);
 	build_readout_box();
 }
+
+void DircThreeSegBoxSim::print_model(){
+
+	printf("\n\n*******************************************\n");
+	printf("           DIRC GEOMETRY:            \n\n");
+
+	printf("    Bar Box:\n");
+	printf("  Bar Length (mm): %12.04f\n",barLength);
+	printf("  Bar Width  (mm): %12.04f\n",barWidth);
+	printf("  Bar Depth  (mm): %12.04f\n",barDepth);
+	printf("  xoff       (mm): %12.04f\n",bar_box_xoff);
+	printf("  yoff       (mm): %12.04f\n",bar_box_yoff);
+	printf("  zoff       (mm): %12.04f\n",bar_box_zoff);
+
+	printf("\n\n    Wedge:\n");
+	printf("  upperWedgeTop        (mm): %12.04f\n",upperWedgeTop);
+	printf("  upperWedgeBottom     (mm): %12.04f\n",upperWedgeBottom);
+	printf("  upperWedgeHeight     (mm): %12.04f\n",upperWedgeHeight);
+	printf("  upperWedgeDepthHigh  (mm): %12.04f\n",upperWedgeDepthHigh);
+	printf("  upperWedgeGap        (mm): %12.04f\n",upperWedgeGap);
+	printf("  upperWedgeFarZ       (mm): %12.04f\n",upperWedgeFarZ);
+	printf("  wedgeTop             (mm): %12.04f\n",wedgeTop);
+	printf("  wedgeWidthOff        (mm): %12.04f\n",wedgeWidthOff);
+	printf("  wedgeDepthOff        (mm): %12.04f\n",wedgeDepthOff);
+	printf("  wedgeFarAngle       (deg): %12.04f\n",wedgeFarAngle);
+	printf("  wedgeCloseAngle     (deg): %12.04f\n",wedgeCloseAngle);
+	printf("  wedgeWidth           (mm): %12.04f\n",wedgeWidth);
+	printf("  wedgeHeight          (mm): %12.04f\n",wedgeHeight);
+	printf("  wedgeDepthHigh       (mm): %12.04f\n",wedgeDepthHigh);
+	printf("  lowerWedgeExtensionZ (mm): %12.04f\n",lowerWedgeExtensionZ);
+	printf("  windowThickness      (mm): %12.04f\n",windowThickness);
+
+	printf("\n\n    Optical Box:\n\n");
+
+	printf("\n   three-seg mirror:\n");
+	printf("  rot     (deg): %12.04f\n",foc_rot);
+	printf("  focMirrorTop     (mm): %12.04f\n",focMirrorTop);
+	printf("  focMirrorBottom  (mm): %12.04f\n",focMirrorBottom);
+	printf("  focMirrorZDim    (mm): %12.04f\n",focMirrorZDim);
+	printf("  theta_1  (deg): %12.04f\n",threeSeg_theta_1*rad2deg);
+	printf("  theta_2  (deg): %12.04f\n",threeSeg_theta_2*rad2deg);
+	printf("  theta_3  (deg): %12.04f\n",threeSeg_theta_3*rad2deg);
+	printf("  seg1Y     (mm): %12.04f\n",threeSeg1Y);
+	printf("  seg1Z     (mm): %12.04f\n",threeSeg1Z);
+	printf("  seg2Y     (mm): %12.04f\n",threeSeg2Y);
+	printf("  seg2Z     (mm): %12.04f\n",threeSeg2Z);
+	printf("  seg3Y     (mm): %12.04f\n",threeSeg3Y);
+	printf("  seg3Z     (mm): %12.04f\n",threeSeg3Z);
+	printf("  seg3Y_end (mm): %12.04f\n",threeSeg3Y_end);
+	printf("  seg3Z_end (mm): %12.04f\n",threeSeg3Z_end);
+	printf("  Yoff      (mm): %12.04f\n",focYoff);
+	printf("  Zoff      (mm): %12.04f\n",focZoff);
+	printf("  Yrot     (deg): %12.04f\n",foc_yrot);
+	printf("  Zrot     (deg): %12.04f\n",foc_zrot);
+	printf("  size      (mm): %12.04f\n",foc_mirror_size);
+
+	printf("\n   Big Flat Mirror:\n");
+	printf("  minZ  (mm): %12.04f\n",largePlanarMirrorMinZ);
+	printf("  maxZ  (mm): %12.04f\n",largePlanarMirrorMaxZ);
+
+	printf("\n   Side mirrors::\n");
+	printf("  xl (mm): %12.04f\n",sidemirror_xl);
+	printf("  xr (mm): %12.04f\n",sidemirror_xr);
+
+	printf("\n   PMT plane:\n");
+	printf("  rot      (deg): %12.04f\n",sens_rot);
+	printf("  Y         (mm): %12.04f\n",sensPlaneY);
+	printf("  Z         (mm): %12.04f\n",sensPlaneZ);
+	printf("  reflOff   (mm): %12.04f\n",reflOff);
+	printf("  minZ      (mm): %12.04f\n",pmtPlaneMinZ);
+	printf("  maxZ      (mm): %12.04f\n",pmtPlaneMaxZ);
+	printf("  boxCloseZ (mm): %12.04f\n",boxCloseZ);
+	printf("  size      (mm): %12.04f\n",sens_size);
+
+	printf("\n   END OF DIRC GEOMETRY PRINTOUT \n");
+	printf("*******************************************\n\n");
+
+}
+
 double DircThreeSegBoxSim::get_cerenkov_angle_rand(double beta, double additional_spread, double &wavelength) {
         //May be slow enough to consider approximating in distribution generation
         double out_ang = 0;
@@ -297,40 +371,48 @@ void DircThreeSegBoxSim::fill_threeseg_plane_vecs() {
 
 	double theta_m = foc_rot/57.3;//radians of rotation to go through
 	double theta_c = fabs(2*asin(focMirrorZDim/(2*foc_r)));//angle subtended by the mirror
-	double seg_h = fabs(2*foc_r*sin(theta_c/6));//length of each segment;
+	seg_h = fabs(2*foc_r*sin(theta_c/6));//length of each segment;
 
 	//I had to do some geometry and algebra to get these numbers, but in hindsight, it's obvious.  Always that way.
-	double theta_1 = theta_m - theta_c/3;
-	double theta_2 = theta_m;
-	double theta_3 = theta_m + theta_c/3;
+	threeSeg_theta_1 = theta_m - theta_c/3;
+	threeSeg_theta_2 = theta_m;
+	threeSeg_theta_3 = theta_m + theta_c/3;
 
+/*
+	seg_h = 96.;
+	threeSeg_theta_1 = (90. - 22.8935) / rad2deg;
+	threeSeg_theta_2 = (90. - 15.9803) / rad2deg;
+	threeSeg_theta_3 = (90. - 9.067)   / rad2deg;
+*/
 	threeSeg1Y = focMirrorBottom + focYoff;
 	threeSeg1Z = 0 + focZoff;
 
-	threeSeg2Y = threeSeg1Y + seg_h*cos(theta_1);
-	threeSeg2Z = threeSeg1Z - seg_h*sin(theta_1);
+	threeSeg2Y = threeSeg1Y + seg_h*cos(threeSeg_theta_1);
+	threeSeg2Z = threeSeg1Z - seg_h*sin(threeSeg_theta_1);
 
-	threeSeg3Y = threeSeg2Y + seg_h*cos(theta_2);
-	threeSeg3Z = threeSeg2Z - seg_h*sin(theta_2);
+	threeSeg3Y = threeSeg2Y + seg_h*cos(threeSeg_theta_2);
+	threeSeg3Z = threeSeg2Z - seg_h*sin(threeSeg_theta_2);
 
+	threeSeg3Y_end = threeSeg3Y + seg_h*cos(threeSeg_theta_3);
+	threeSeg3Z_end = threeSeg3Z - seg_h*sin(threeSeg_theta_3);
 
 	threeSeg1Nx = 0;
-	threeSeg1Ny = sin(theta_1);
-	threeSeg1Nz = cos(theta_1);
+	threeSeg1Ny = sin(threeSeg_theta_1);
+	threeSeg1Nz = cos(threeSeg_theta_1);
 	rotate_2d(threeSeg1Nx,threeSeg1Nz,cos(foc_yrot/57.3),sin(foc_yrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
 	rotate_2d(threeSeg1Nx,threeSeg1Ny,cos(foc_zrot/57.3),sin(foc_zrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
 	threeSeg1D = threeSeg1Ny*threeSeg1Y + threeSeg1Nz*threeSeg1Z;//Use point x=0 as reference
 
 	threeSeg2Nx = 0;
-	threeSeg2Ny = sin(theta_2);
-	threeSeg2Nz = cos(theta_2);
+	threeSeg2Ny = sin(threeSeg_theta_2);
+	threeSeg2Nz = cos(threeSeg_theta_2);
 	rotate_2d(threeSeg2Nx,threeSeg2Nz,cos(foc_yrot/57.3),sin(foc_yrot/57.3));
 	rotate_2d(threeSeg2Nx,threeSeg2Ny,cos(foc_zrot/57.3),sin(foc_zrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
 	threeSeg2D = threeSeg2Ny*threeSeg2Y + threeSeg2Nz*threeSeg2Z;//Use point x=0 as reference
 
 	threeSeg3Nx = 0;
-	threeSeg3Ny = sin(theta_3);
-	threeSeg3Nz = cos(theta_3);
+	threeSeg3Ny = sin(threeSeg_theta_3);
+	threeSeg3Nz = cos(threeSeg_theta_3);
 	rotate_2d(threeSeg3Nx,threeSeg3Nz,cos(foc_yrot/57.3),sin(foc_yrot/57.3));
 	rotate_2d(threeSeg3Nx,threeSeg3Ny,cos(foc_zrot/57.3),sin(foc_zrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
 	threeSeg3D = threeSeg3Ny*threeSeg3Y + threeSeg3Nz*threeSeg3Z;//Use point x=0 as reference
@@ -484,6 +566,7 @@ void DircThreeSegBoxSim::warp_readout_box(
 	}
 
 	out_val.t = mm_index/(c_mm_ns);
+	//printf("bar offset for bar %d: %12.04f\n",particle_bar,get_bar_offset(particle_bar));
 	out_val.x += get_bar_offset(particle_bar);
 	
 	//Must reflect after offset....

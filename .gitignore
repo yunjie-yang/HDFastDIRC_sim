@@ -1,3 +1,8 @@
 lib/*.o
 *.swp
 hdfastdirc_sim
+*.root
+root_outputs/*
+*.py
+*.C
+*.pdf

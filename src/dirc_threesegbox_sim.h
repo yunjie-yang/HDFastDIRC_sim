@@ -26,11 +26,20 @@ protected:
 	double largePlanarMirrorMaxZ;
 	double pmtPlaneMinZ;
 	double pmtPlaneMaxZ;
+
+
+	//Additions to threeSeg
+	double threeSeg_theta_1;
+	double threeSeg_theta_2;
+	double threeSeg_theta_3;
+	double seg_h;
+	double threeSeg3Y_end,threeSeg3Z_end;
 	
 	double focMirrorBottom;
 	double focMirrorTop;
 	double focMirrorZDim;
 	//Multiseg?  probably not.  If it goes up again, use arrays
+
 	double threeSeg1Nx,threeSeg1Ny,threeSeg1Nz,threeSeg1D;
 	double threeSeg2Nx,threeSeg2Ny,threeSeg2Nz,threeSeg2D;
 	double threeSeg3Nx,threeSeg3Ny,threeSeg3Nz,threeSeg3D;
@@ -186,7 +195,6 @@ public:
 	void set_large_mirror_zs(double imin, double imax);
 	void set_mirror_plane_offsets(double off_y, double off_z);
 
-
 	
 	void set_store_optical_angles(bool ibool);
 	std::vector<double> get_focus_photon_angles();
@@ -203,5 +211,8 @@ public:
 		double ibar_width=35,\
                 double ibar_depth=17.25,\
                 double iupper_wedge_top = 178.6);
+
+	void print_model();
+
 };
 #endif

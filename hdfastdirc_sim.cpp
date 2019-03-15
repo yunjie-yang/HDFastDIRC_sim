@@ -8,9 +8,11 @@
 #include <math.h>
 #include <time.h>
 
-#include "src/dirc_optical_sim.h"
 #include "src/dirc_threesegbox_sim.h"
 #include "src/dirc_point.h"
+#include "src/dirc_rect_digitizer.h"
+/*
+#include "src/dirc_optical_sim.h"
 #include "src/dirc_probability_spread.h"
 #include "src/dirc_probability_separation.h"
 #include "src/dirc_spread_radius.h"
@@ -18,13 +20,13 @@
 #include "src/dirc_spread_linear_soft.h"
 #include "src/dirc_spread_gaussian.h"
 #include "src/dirc_digitizer.h"
-#include "src/dirc_rect_digitizer.h"
 #include "src/dirc_babar_digitizer.h"
 #include "src/dirc_babar_sim.h"
 #include "src/dirc_progressive_separation.h"
 #include "src/dirc_gluex_lut_enum.h"
 #include "src/dirc_lut_enum.h"
 #include "src/dirc_lut.h"
+*/
 #include <TFile.h>
 #include <TTree.h>
 #include <TH3.h>
@@ -34,6 +36,7 @@
 #include <TRandom3.h>
 #include <TMinuit.h>
 
+#define rad2deg 57.2958
 
 int main(int nargs, char* argv[])
 {
@@ -48,6 +51,7 @@ int main(int nargs, char* argv[])
 	double particle_y = 0;
 	double particle_theta = 0;
 	double particle_phi = 0;
+	double particle_bar = 1;
 
 	double particle_flight_distance = 0;
 
@@ -130,10 +134,9 @@ int main(int nargs, char* argv[])
 	sm_xl = -50;
 	sm_xr = sm_xl + 440;
 */
-
-	sm_xl = -45;
-	sm_xr = sm_xl + 1000;
-
+	sm_xr = 40.85;
+	sm_xl = sm_xr - 983.32;
+	
 	bool use_quartz_for_liquid = false;
 	bool three_seg_mirror = true;
 
@@ -245,6 +248,11 @@ int main(int nargs, char* argv[])
 			{
 				i++;
 				particle_x = atof(argv[i]);
+			}
+			else if (strcmp(argv[i], "-particle_bar") == 0)
+			{
+				i++;
+				particle_bar = atoi(argv[i]);
 			}
 			else if (strcmp(argv[i], "-E") == 0)
 			{
@@ -385,13 +393,8 @@ int main(int nargs, char* argv[])
 	}
 
 
-	double main_mirror_angle = 74.11+mirror_angle_change;
-
-
-	double rad_to_deg = 57.2958;
-
-	double res_enhance = 1;
-
+	//double main_mirror_angle = 74.11+mirror_angle_change;
+	double main_mirror_angle = 74.0197+mirror_angle_change;
 
 	TRandom3 spread_ang(rseed+3);
 
@@ -420,6 +423,7 @@ int main(int nargs, char* argv[])
 
 	TFile* tfile = new TFile(rootfilename,"RECREATE");
 
+	double res_enhance = 1;
 	TH1F *pion_dist_x = new TH1F("pion_dist_x","x val of intercepted points - pion",(maxx-minx)/(res_enhance*resx),minx,maxx);
 	TH1F *pion_dist_y = new TH1F("pion_dist_y","y val of intercepted points - pion",(maxy-miny)/(res_enhance*resy),miny,maxy);
 	TH1F *pion_dist_t = new TH1F("pion_dist_t","t val of intercepted points - pion",(maxt-mint)/(res_enhance*rest),mint,maxt);
@@ -427,7 +431,7 @@ int main(int nargs, char* argv[])
 	TH2F *pion_dist_xt = new TH2F("pion_dist_xt","xt val of intercepted points - pion",(maxx-minx)/(res_enhance*resx),minx,maxx,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *pion_dist_yt = new TH2F("pion_dist_yt","yt val of intercepted points - pion",(maxy-miny)/(res_enhance*resy),miny,maxy,(maxt-mint)/(res_enhance*rest),mint,maxt);
 
-	TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
+	TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",190,-10.5,179.5,70,-10.5,59.5);
 
 	DircRectDigitizer digitizer(\
 			minx,\
@@ -491,6 +495,7 @@ int main(int nargs, char* argv[])
 					 		 bar_box_yoff,\
 					 		 bar_box_zoff);
 
+		//dirc_model->print_model();
 
 
 		dirc_model->sim_reg_n_photons(\
@@ -498,7 +503,7 @@ int main(int nargs, char* argv[])
 				n_phi_phots,\
 				n_z_phots,\
 				-1,\
-				1,\
+				particle_bar,\
 				particle_x,\
 				particle_y,\
 				pion_time,\

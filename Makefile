@@ -8,22 +8,23 @@ CFLAGS = $(CFLAGS_BASE) $(goptical_CPPFLAGS)
 LIBLOC = ./lib/
 OUT = ./hdfastdirc_sim
 
-OBJFILES = dirc_optical_sim.o
+OBJFILES = dirc_base_sim.o
 OBJFILES += dirc_threesegbox_sim.o
-OBJFILES += dirc_babar_sim.o
-OBJFILES += dirc_base_sim.o
-OBJFILES += dirc_lut_enum.o
-OBJFILES += dirc_lut.o
-OBJFILES += dirc_gluex_lut_enum.o
 OBJFILES += dirc_rect_digitizer.o
-OBJFILES += dirc_babar_digitizer.o
-OBJFILES += dirc_probability_spread.o
-OBJFILES += dirc_spread_relative.o
-OBJFILES += dirc_spread_radius.o
-OBJFILES += dirc_spread_linear_soft.o
-OBJFILES += dirc_spread_gaussian.o
-OBJFILES += dirc_probability_separation.o
-OBJFILES += dirc_progressive_separation.o
+
+#OBJFILES += dirc_optical_sim.o
+#OBJFILES += dirc_babar_sim.o
+#OBJFILES += dirc_lut_enum.o
+#OBJFILES += dirc_lut.o
+#OBJFILES += dirc_gluex_lut_enum.o
+#OBJFILES += dirc_babar_digitizer.o
+#OBJFILES += dirc_probability_spread.o
+#OBJFILES += dirc_spread_relative.o
+#OBJFILES += dirc_spread_radius.o
+#OBJFILES += dirc_spread_linear_soft.o
+#OBJFILES += dirc_spread_gaussian.o
+#OBJFILES += dirc_probability_separation.o
+#OBJFILES += dirc_progressive_separation.o
 
 OBJLOC = $(patsubst %,$(LIBLOC)/%,$(OBJFILES))
 LIBFILES = $(LIBLOC)

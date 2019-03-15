@@ -301,11 +301,13 @@ double DircBaseSim::get_beta(double E, double m) {
 }
 double DircBaseSim::get_bar_offset(int bar)
 {
-	return fabs(bar)/bar*((150-0.5*(barWidth))+bar*(barWidth+.015));
+	//return fabs(bar)/bar*((150-0.5*(barWidth))+bar*(barWidth+.015));
+	return -bar*(barWidth+.15);
 }
 int DircBaseSim::get_bar_from_x(double x)
 {
-
+	printf("This function shouldn't be called for now.\n");
+	
 	if (x < -150)
 	{
 		return (x+150)/(barWidth+.015) - 1;
@@ -960,6 +962,7 @@ void DircBaseSim::fill_reg_phi(\
 		int save_kin /* = -1*/)
 {
 
+/*
 		std::cout<<"n_photons_phi     = "<<n_photons_phi<<std::endl;
 		std::cout<<"n_photons_z       = "<<n_photons_z<<std::endl;
 		std::cout<<"ckov_theta        = "<<ckov_theta<<std::endl;
@@ -973,7 +976,7 @@ void DircBaseSim::fill_reg_phi(\
 		std::cout<<"ckov_theta_unc    = "<<ckov_theta_unc<<std::endl;
 		std::cout<<"beta              = "<<beta<<std::endl;
 		std::cout<<"save_kin          = "<<save_kin<<std::endl;
-
+*/
 
 
 	double sDepth = .95*barDepth;
@@ -1108,6 +1111,16 @@ void DircBaseSim::fill_reg_phi(\
 				tmp_updown = -1;
 			}
 
+			std::vector<std::vector<double>> paths;
+			std::vector<double> path_point; 
+			path_point.push_back(z);
+			path_point.push_back(x);
+			path_point.push_back(y);
+			path_point.push_back(dz);
+			path_point.push_back(dx);
+			path_point.push_back(dy);
+			paths.push_back(path_point);
+
 			mm_index += warp_ray(\
 					x,\
 					y,\
@@ -1117,13 +1130,21 @@ void DircBaseSim::fill_reg_phi(\
 					dz,\
 					sqrt(1-1/(1.47*1.47)));
 
-
 			if (z > 0)
 			{
 				continue;
 			}
 
 			//spread_wedge_mirror();
+
+			path_point.clear();
+			path_point.push_back(z);
+			path_point.push_back(x);
+			path_point.push_back(y);
+			path_point.push_back(dz);
+			path_point.push_back(dx);
+			path_point.push_back(dy);
+			paths.push_back(path_point);
 
 			mm_index += warp_wedge(\
 					x,\
@@ -1132,16 +1153,52 @@ void DircBaseSim::fill_reg_phi(\
 					dx,\
 					dy,\
 					dz);
+/*
+			path_point.clear();
+			path_point.push_back(z);
+			path_point.push_back(x);
+			path_point.push_back(y);
+			path_point.push_back(dz);
+			path_point.push_back(dx);
+			path_point.push_back(dy);
+			paths.push_back(path_point);
+*/
+
 
 			//account (quickly) for the bar box having a different angle than the readout
 			//rotate_2d(dy,dz,box_angle_off_cval,box_angle_off_sval);
 			bar_box_interface(x,y,z,dx,dy,dz);
-
 			if (z > 0)
 			{
 				//printf("%12.04f %12.04f %12.04f\n",x,y,z);
 				continue;
 			}
+			path_point.clear();
+			path_point.push_back(z);
+			path_point.push_back(x);
+			path_point.push_back(y);
+			path_point.push_back(dz);
+			path_point.push_back(dx);
+			path_point.push_back(dy);
+			paths.push_back(path_point);
+
+			if (false)
+			//if (int(paths.size())==3 && j < 1000)
+			{
+				printf("\n\n");
+				for (int p = 0 ; p < 3 ; p++)
+				{
+					printf("\n");
+					printf("z  : %12.04f\n",paths[p][0]);
+					printf("x  : %12.04f\n",paths[p][1]);
+					printf("y  : %12.04f\n",paths[p][2]);
+					printf("dz : %12.04f\n",paths[p][3]);
+					printf("dx : %12.04f\n",paths[p][4]);
+					printf("dy : %12.04f\n",paths[p][5]);
+				}
+
+			}
+
 
 			dirc_point out_val;
 			warp_readout_box(out_val,particle_bar,mm_index,x,y,z,dx,dy,dz);

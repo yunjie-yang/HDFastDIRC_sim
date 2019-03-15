@@ -65,7 +65,7 @@ void DircRectDigitizer::digitize_point(dirc_point &pt)
 	}
 
 	//Converting to a channel number: needs to be done more properly
-        int xhit = (xout - (-55.))/resx;
+        int xhit = (40.85 - xout)/resx;
         int yhit = (yout - (-55.))/resy;
 
 /*

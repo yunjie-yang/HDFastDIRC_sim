@@ -4,6 +4,8 @@
 
 #include "dirc_point.h"
 
+#define rad2deg 57.2958
+
 #ifndef DIRC_BASE_SIM
 #define DIRC_BASE_SIM 
 struct dirc_base_sim_tracking_step
