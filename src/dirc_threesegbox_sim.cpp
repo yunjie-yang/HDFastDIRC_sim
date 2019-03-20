@@ -11,8 +11,6 @@
 
 #include <TRandom3.h>
 
-//#define rad2deg 57.2958
-
 DircThreeSegBoxSim::DircThreeSegBoxSim(
 		int rand_seed /*=4357*/,\
 		double ifoc_r/*=540.66*/, \
@@ -84,7 +82,7 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 #endif
 	reflOff = baseReflOff;
 
-	three_seg_mirror = false;
+	three_seg_mirror = true;
 
 	num_QE = 31;
 	min_QE = 300;
@@ -180,7 +178,8 @@ void DircThreeSegBoxSim::print_model(){
 	printf("\n\n    Optical Box:\n\n");
 
 	printf("\n   three-seg mirror:\n");
-	printf("  rot     (deg): %12.04f\n",foc_rot);
+	printf("  in place             : %12d\n",three_seg_mirror);
+	printf("  rot             (deg): %12.04f\n",foc_rot);
 	printf("  focMirrorTop     (mm): %12.04f\n",focMirrorTop);
 	printf("  focMirrorBottom  (mm): %12.04f\n",focMirrorBottom);
 	printf("  focMirrorZDim    (mm): %12.04f\n",focMirrorZDim);
@@ -200,6 +199,7 @@ void DircThreeSegBoxSim::print_model(){
 	printf("  Yrot     (deg): %12.04f\n",foc_yrot);
 	printf("  Zrot     (deg): %12.04f\n",foc_zrot);
 	printf("  size      (mm): %12.04f\n",foc_mirror_size);
+	printf("  r         (mm): %12.04f\n",foc_r);
 
 	printf("\n   Big Flat Mirror:\n");
 	printf("  minZ  (mm): %12.04f\n",largePlanarMirrorMinZ);

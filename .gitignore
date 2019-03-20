@@ -6,3 +6,4 @@ root_outputs/*
 *.py
 *.C
 *.pdf
+*.gif

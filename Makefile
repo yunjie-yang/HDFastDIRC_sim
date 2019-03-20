@@ -6,11 +6,14 @@ INCLUDE = -I./src/
 CFLAGS = $(CFLAGS_BASE) $(goptical_CPPFLAGS)
 
 LIBLOC = ./lib/
-OUT = ./hdfastdirc_sim
+#OUT = ./hdfastdirc_sim
+OUT = ./hdfastdirc
 
 OBJFILES = dirc_base_sim.o
 OBJFILES += dirc_threesegbox_sim.o
 OBJFILES += dirc_rect_digitizer.o
+OBJFILES += dirc_spread_gaussian.o
+OBJFILES += GlueXUserOptions.o
 
 #OBJFILES += dirc_optical_sim.o
 #OBJFILES += dirc_babar_sim.o
@@ -22,7 +25,6 @@ OBJFILES += dirc_rect_digitizer.o
 #OBJFILES += dirc_spread_relative.o
 #OBJFILES += dirc_spread_radius.o
 #OBJFILES += dirc_spread_linear_soft.o
-#OBJFILES += dirc_spread_gaussian.o
 #OBJFILES += dirc_probability_separation.o
 #OBJFILES += dirc_progressive_separation.o
 
@@ -36,8 +38,8 @@ vpath %.cpp ./src/
 	mv $@ $(LIBLOC)
 
 .PHONY : all
-all: hdfastdirc_sim.cpp $(OBJFILES)
-	g++ -Wall hdfastdirc_sim.cpp $(OBJLOC) $(CFLAGS) $(INCLUDE) -o $(OUT)
+all: $(OUT).cpp $(OBJFILES)
+	g++ -Wall $(OUT).cpp $(OBJLOC) $(CFLAGS) $(INCLUDE) -o $(OUT)
 
 .PHONY : libs
 libs: $(OBJFILES)

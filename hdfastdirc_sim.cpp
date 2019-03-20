@@ -51,7 +51,7 @@ int main(int nargs, char* argv[])
 	double particle_y = 0;
 	double particle_theta = 0;
 	double particle_phi = 0;
-	double particle_bar = 1;
+	double particle_bar = 0;
 
 	double particle_flight_distance = 0;
 
@@ -398,6 +398,8 @@ int main(int nargs, char* argv[])
 
 	TRandom3 spread_ang(rseed+3);
 
+	TRandom3 rand_spread(rseed+4);
+
 	DircThreeSegBoxSim *dirc_model = new DircThreeSegBoxSim(\
 			rseed,\
 			-1200 + mirror_r_difference,\
@@ -431,7 +433,10 @@ int main(int nargs, char* argv[])
 	TH2F *pion_dist_xt = new TH2F("pion_dist_xt","xt val of intercepted points - pion",(maxx-minx)/(res_enhance*resx),minx,maxx,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *pion_dist_yt = new TH2F("pion_dist_yt","yt val of intercepted points - pion",(maxy-miny)/(res_enhance*resy),miny,maxy,(maxt-mint)/(res_enhance*rest),mint,maxt);
 
-	TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",190,-10.5,179.5,70,-10.5,59.5);
+	TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
+	
+	TH1F *pion_NphC  = new TH1F("pion_NphC", "NphC ; Num. Photons ;", 150, -0.5, 149.5);
+
 
 	DircRectDigitizer digitizer(\
 			minx,\
@@ -450,9 +455,6 @@ int main(int nargs, char* argv[])
 
 		printf("No input file specified.  Running in loop mode\n");
 
-
-		pion_beta = dirc_model->get_beta(energy,pimass);
-		kaon_beta = dirc_model->get_beta(energy,kmass);
 
 		std::vector<dirc_point> hit_points_pion;
 
@@ -495,8 +497,10 @@ int main(int nargs, char* argv[])
 					 		 bar_box_yoff,\
 					 		 bar_box_zoff);
 
-		//dirc_model->print_model();
+		dirc_model->print_model();
 
+		pion_beta = dirc_model->get_beta(energy,pimass);
+		kaon_beta = dirc_model->get_beta(energy,kmass);
 
 		dirc_model->sim_reg_n_photons(\
 				hit_points_pion,\
@@ -513,13 +517,23 @@ int main(int nargs, char* argv[])
 				ckov_unc/1.,\
 				pion_beta,\
 				-1); //stores values for next generated model
-		/*
+/*
+		for (int j = 0 ; j < num_runs ; j++)
+		{
+		particle_x     = -17.5+ 35.*rand_spread.Rndm();
+		particle_y     = -25 + 50.*rand_spread.Rndm();
+		particle_theta = -1. + 2.*rand_spread.Rndm();
+		particle_phi   = 360.*rand_spread.Rndm();
+		energy         = 3.8 + 0.4 *rand_spread.Rndm();
+		pion_beta = dirc_model->get_beta(energy,pimass);
+		particle_bar   = 3;
+
 		dirc_model->sim_rand_n_photons(\
 				//sim_points,
 				hit_points_pion,\
 				n_sim_phots,\
 				pion_angle,\
-				1,\
+				particle_bar,\
 				particle_x,\
 				particle_y,\
 				pion_time,\
@@ -528,19 +542,25 @@ int main(int nargs, char* argv[])
 				tracking_unc,\
 				ckov_unc,\
 				pion_beta);
-		*/
 
+*/
 		digitizer.digitize_points(hit_points_pion);
 
 
-		printf("\nRun Completed\n");
+		//printf("\nRun Completed\n");
 
 		double x,y,t_ns;
+		int ch,pixel_row;
+		int NphC_count = 0;
 		for (unsigned int i = 0; i < hit_points_pion.size(); i++)
 		{
 			x = hit_points_pion[i].x;
 			y = hit_points_pion[i].y;
 			t_ns = hit_points_pion[i].t;
+			ch = hit_points_pion[i].ch;
+			pixel_row = hit_points_pion[i].pixel_row;
+			if (pixel_row<0) continue;
+			NphC_count++; 
 			pion_dist_x->Fill(x);
 			pion_dist_y->Fill(y);
 			pion_dist_t->Fill(t_ns);
@@ -551,6 +571,9 @@ int main(int nargs, char* argv[])
 
 			pion_dist_rowcol->Fill(hit_points_pion[i].pixel_row,hit_points_pion[i].pixel_col);
 		}
+		pion_NphC -> Fill(NphC_count);
+
+		//}
 
 	}
 
@@ -562,6 +585,7 @@ int main(int nargs, char* argv[])
 	pion_dist_yt->Write();
 	pion_dist_t->Write();
 	pion_dist_rowcol->Write();
+	pion_NphC->Write();
 
 	tfile->Close();
 

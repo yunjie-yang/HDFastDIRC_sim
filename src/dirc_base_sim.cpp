@@ -36,7 +36,8 @@ DircBaseSim::DircBaseSim(
 
 	upperWedgeAngleStore = false;
 
-	wedgeDepthHigh = wedgeDepthOff+barDepth+wedgeHeight*sin(wedgeCloseAngle/57.296);
+	//wedgeDepthHigh = wedgeDepthOff+barDepth+wedgeHeight*sin(wedgeCloseAngle/57.296); //FastDIRC
+	wedgeDepthHigh = wedgeDepthOff+barDepth+wedgeHeight*tan(wedgeCloseAngle/57.296);
 
 	windowThickness = 9.6;
 
@@ -1111,6 +1112,7 @@ void DircBaseSim::fill_reg_phi(\
 				tmp_updown = -1;
 			}
 
+/*
 			std::vector<std::vector<double>> paths;
 			std::vector<double> path_point; 
 			path_point.push_back(z);
@@ -1120,7 +1122,7 @@ void DircBaseSim::fill_reg_phi(\
 			path_point.push_back(dx);
 			path_point.push_back(dy);
 			paths.push_back(path_point);
-
+*/
 			mm_index += warp_ray(\
 					x,\
 					y,\
@@ -1137,6 +1139,7 @@ void DircBaseSim::fill_reg_phi(\
 
 			//spread_wedge_mirror();
 
+/*
 			path_point.clear();
 			path_point.push_back(z);
 			path_point.push_back(x);
@@ -1145,7 +1148,7 @@ void DircBaseSim::fill_reg_phi(\
 			path_point.push_back(dx);
 			path_point.push_back(dy);
 			paths.push_back(path_point);
-
+*/
 			mm_index += warp_wedge(\
 					x,\
 					y,\
@@ -1173,6 +1176,7 @@ void DircBaseSim::fill_reg_phi(\
 				//printf("%12.04f %12.04f %12.04f\n",x,y,z);
 				continue;
 			}
+/*
 			path_point.clear();
 			path_point.push_back(z);
 			path_point.push_back(x);
@@ -1199,7 +1203,7 @@ void DircBaseSim::fill_reg_phi(\
 
 			}
 
-
+*/
 			dirc_point out_val;
 			warp_readout_box(out_val,particle_bar,mm_index,x,y,z,dx,dy,dz);
 
