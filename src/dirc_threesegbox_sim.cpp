@@ -28,8 +28,7 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 				ibar_width,\
 				ibar_depth) {
 
-	sprintf(csv_outputdir,"/media/sf_SharedFolderVM/FastDIRC_geometry");
-	sprintf(csv_filename,"OutOfBox.csv");
+	sprintf(geometry_outfile,"/media/sf_SharedFolderVM/FastDIRC_geometry/dirc_model_geometry.csv");
 
 	foc_r = ifoc_r;
 	foc_mirror_size = ifoc_mirror_size;
@@ -161,20 +160,16 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	build_readout_box();
 }
 
-void DircThreeSegBoxSim::set_csv_filename(const char* filename)
+void DircThreeSegBoxSim::set_geometry_outfile(const char* filename)
 {
-	csv_filename  = (char*)filename;
-}
-void DircThreeSegBoxSim::set_csv_outputdir(const char* outputdir)
-{
-	csv_outputdir  = (char*)outputdir;
+	geometry_outfile  = (char*)filename;
 }
 
 void DircThreeSegBoxSim::print_model()
 {
 
 	std::ofstream output_csv;
-	output_csv.open(Form("%s/%s",csv_outputdir,csv_filename));
+	output_csv.open(Form("%s",geometry_outfile));
 
 	printf("\n\n*******************************************\n");
 	printf("           DIRC GEOMETRY:            \n\n");
@@ -252,6 +247,8 @@ void DircThreeSegBoxSim::print_model()
 	printf("  boxCloseZ        (mm): %12.04f\n",boxCloseZ);output_csv<<"boxCloseZ\t"<<boxCloseZ<<"\n";
 	printf("  unReflSensPlaneY (mm): %12.04f\n",unReflSensPlaneY);output_csv<<"unReflSensPlaneY\t"<<unReflSensPlaneY<<"\n";
 	printf("  unReflSensPlaneZ (mm): %12.04f\n",unReflSensPlaneZ);output_csv<<"unReflSensPlaneZ\t"<<unReflSensPlaneZ<<"\n";
+	printf("  sensPlaneY       (mm): %12.04f\n",sensPlaneY);output_csv<<"sensPlaneY \t "<<sensPlaneY<<"\n";
+	printf("  sensPlaneZ       (mm): %12.04f\n",sensPlaneZ);output_csv<<"sensPlaneZ \t "<<sensPlaneZ<<"\n";
 	printf("  size             (mm): %12.04f\n",sens_size);output_csv<<"sens_size\t"<<sens_size<<"\n";
 
 	printf("\n   END OF DIRC GEOMETRY PRINTOUT \n");
