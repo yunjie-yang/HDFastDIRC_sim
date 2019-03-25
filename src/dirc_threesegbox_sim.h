@@ -27,6 +27,9 @@ protected:
 	double pmtPlaneMinZ;
 	double pmtPlaneMaxZ;
 
+	double upperWedgeMirrorTop;
+	double largePlanarMirrorY;
+
 
 	//Additions to threeSeg
 	double threeSeg_theta_1;
@@ -174,6 +177,8 @@ protected:
                 double &dy,\
                 double &dz);
 
+	char* csv_outputdir = new char[256];
+	char* csv_filename  = new char[64];
 
 
 public:
@@ -213,6 +218,9 @@ public:
                 double iupper_wedge_top = 178.6);
 
 	void print_model();
-
+	//void set_outcsvinfo(std::string filename, std::string outputdir);
+	//void set_outcsvinfo(char* filename, char* outputdir);
+	void set_csv_filename(const char* filename);
+	void set_csv_outputdir(const char* outputdir);
 };
 #endif

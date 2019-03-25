@@ -1,6 +1,7 @@
 lib/*.o
 *.swp
 hdfastdirc_sim
+hdfastdirc
 *.root
 root_outputs/*
 *.py
