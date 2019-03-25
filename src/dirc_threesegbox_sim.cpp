@@ -213,14 +213,18 @@ void DircThreeSegBoxSim::print_model()
 	printf("  theta_2  (deg): %12.04f\n",threeSeg_theta_2*rad2deg);output_csv<<"threeSeg_theta_2\t"<<threeSeg_theta_2*rad2deg<<"\n";
 	printf("  theta_3  (deg): %12.04f\n",threeSeg_theta_3*rad2deg);output_csv<<"threeSeg_theta_3\t"<<threeSeg_theta_3*rad2deg<<"\n";
 	printf("  seg_h     (mm): %12.04f\n",seg_h);output_csv<<"seg_h\t"<<seg_h<<"\n";
-	printf("  seg1Y     (mm): %12.04f\n",threeSeg1Y);output_csv<<"threeSeg1Y\t"<<threeSeg1Y<<"\n";
-	printf("  seg1Z     (mm): %12.04f\n",threeSeg1Z);output_csv<<"threeSeg1Z\t"<<threeSeg1Z<<"\n";
-	printf("  seg2Y     (mm): %12.04f\n",threeSeg2Y);output_csv<<"threeSeg2Y\t"<<threeSeg2Y<<"\n";
-	printf("  seg2Z     (mm): %12.04f\n",threeSeg2Z);output_csv<<"threeSeg2Z\t"<<threeSeg2Z<<"\n";
-	printf("  seg3Y     (mm): %12.04f\n",threeSeg3Y);output_csv<<"threeSeg3Y\t"<<threeSeg3Y<<"\n";
-	printf("  seg3Z     (mm): %12.04f\n",threeSeg3Z);output_csv<<"threeSeg3Z\t"<<threeSeg3Z<<"\n";
-	printf("  seg3Y_end (mm): %12.04f\n",threeSeg3Y_end);output_csv<<"threeSeg3Y_end\t"<<threeSeg3Y_end<<"\n";
-	printf("  seg3Z_end (mm): %12.04f\n",threeSeg3Z_end);output_csv<<"threeSeg3Z_end\t"<<threeSeg3Z_end<<"\n";
+	printf("  seg1Y     (mm): %12.04f\n",threeSeg1Y);output_csv<<"threeSeg1Y \t "<<threeSeg1Y<<"\n";
+	printf("  seg1Z     (mm): %12.04f\n",threeSeg1Z);output_csv<<"threeSeg1Z \t "<<threeSeg1Z<<"\n";
+	printf("  seg1Y_end (mm): %12.04f\n",threeSeg1Y_end);output_csv<<"threeSeg1Y_end \t "<<threeSeg1Y_end<<"\n";
+	printf("  seg1Z_end (mm): %12.04f\n",threeSeg1Z_end);output_csv<<"threeSeg1Z_end \t "<<threeSeg1Z_end<<"\n";
+	printf("  seg2Y     (mm): %12.04f\n",threeSeg2Y);output_csv<<"threeSeg2Y \t "<<threeSeg2Y<<"\n";
+	printf("  seg2Z     (mm): %12.04f\n",threeSeg2Z);output_csv<<"threeSeg2Z \t "<<threeSeg2Z<<"\n";
+	printf("  seg2Y_end (mm): %12.04f\n",threeSeg2Y_end);output_csv<<"threeSeg2Y_end \t "<<threeSeg2Y_end<<"\n";
+	printf("  seg2Z_end (mm): %12.04f\n",threeSeg2Z_end);output_csv<<"threeSeg2Z_end \t "<<threeSeg2Z_end<<"\n";
+	printf("  seg3Y     (mm): %12.04f\n",threeSeg3Y);output_csv<<"threeSeg3Y \t "<<threeSeg3Y<<"\n";
+	printf("  seg3Z     (mm): %12.04f\n",threeSeg3Z);output_csv<<"threeSeg3Z \t "<<threeSeg3Z<<"\n";
+	printf("  seg3Y_end (mm): %12.04f\n",threeSeg3Y_end);output_csv<<"threeSeg3Y_end \t "<<threeSeg3Y_end<<"\n";
+	printf("  seg3Z_end (mm): %12.04f\n",threeSeg3Z_end);output_csv<<"threeSeg3Z_end \t "<<threeSeg3Z_end<<"\n";
 	printf("  Yoff      (mm): %12.04f\n",focYoff);output_csv<<"focYoff\t"<<focYoff<<"\n";
 	printf("  Zoff      (mm): %12.04f\n",focZoff);output_csv<<"focZoff\t"<<focZoff<<"\n";
 	printf("  Yrot     (deg): %12.04f\n",foc_yrot);output_csv<<"foc_yrot\t"<<foc_yrot<<"\n";
@@ -428,6 +432,13 @@ void DircThreeSegBoxSim::fill_threeseg_plane_vecs() {
 
 	threeSeg3Y_end = threeSeg3Y + seg_h*cos(threeSeg_theta_3);
 	threeSeg3Z_end = threeSeg3Z - seg_h*sin(threeSeg_theta_3);
+
+
+	threeSeg1Y_end = threeSeg2Y;
+	threeSeg1Z_end = threeSeg2Z;
+
+	threeSeg2Y_end = threeSeg3Y;
+	threeSeg2Z_end = threeSeg3Z;
 
 	threeSeg1Nx = 0;
 	threeSeg1Ny = sin(threeSeg_theta_1);

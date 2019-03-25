@@ -36,6 +36,8 @@ protected:
 	double threeSeg_theta_2;
 	double threeSeg_theta_3;
 	double seg_h;
+	double threeSeg1Y_end,threeSeg1Z_end;
+	double threeSeg2Y_end,threeSeg2Z_end;
 	double threeSeg3Y_end,threeSeg3Z_end;
 	
 	double focMirrorBottom;
