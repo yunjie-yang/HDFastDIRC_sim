@@ -1,3 +1,10 @@
 SIM_ONLY 1
+cGEOMETRY_INFILE '/media/sf_SharedFolderVM/FastDIRC_geometry/OutOfBox.csv'
+
+
+GEOMETRY_INFILE '/media/sf_SharedFolderVM/FastDIRC_geometry/FastDIRC_HDDS_Nominal.csv'
+
+OUTFILE '/media/sf_SharedFolderVM/FastDIRC_geometry/output_root/out_sens.root'
+GEOMETRY_OUTFILE '/media/sf_SharedFolderVM/FastDIRC_geometry/geometry_csv/dirc_model_geometry_sens.csv'
 
 END

@@ -2,6 +2,9 @@
 
 #include "dirc_threesegbox_sim.h"
 #include "dirc_point.h"
+
+#include "GlueXUserOptions.h"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -18,6 +21,7 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 		double ifoc_rot/*=-74.11*/, \
 		double isens_size/*=600*/, \
 		double isens_rot/*=90*/,\
+		const char* igeometry_infile,\
 		double ibar_length/*=4900*/,\
 		double ibar_width/*=35*/,\
 		double ibar_depth/*=17.25*/,
@@ -28,8 +32,9 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 				ibar_width,\
 				ibar_depth) {
 
-	sprintf(csv_outputdir,"/media/sf_SharedFolderVM/FastDIRC_geometry");
-	sprintf(csv_filename,"OutOfBox.csv");
+	sprintf(geometry_outfile,"/media/sf_SharedFolderVM/FastDIRC_geometry/dirc_model_geometry.csv");
+
+	geometry_infile = (char*) igeometry_infile;
 
 	foc_r = ifoc_r;
 	foc_mirror_size = ifoc_mirror_size;
@@ -41,17 +46,6 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 
 	storeOpticalAngles = false;
 
-	//only used for checking collision
-	largePlanarMirrorNx = 0; //Shouldn't be needed
-	largePlanarMirrorNy = 1;
-	largePlanarMirrorNz = 0;
-	largePlanarMirrorD = upperWedgeTop + barLength/2;
-	largePlanarMirrorMinZ = -559;
-	largePlanarMirrorMaxZ = -130;
-
-	pmtPlaneMinZ = -559;
-	pmtPlaneMaxZ = -329;
-	//pmtPlaneMaxZ = -346;
 
 	focMirrorBottom = 139 + upperWedgeTop + barLength/2;
 
@@ -75,7 +69,7 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	
 
 	//boxCloseZ = -614;
-	boxCloseZ = -559;
+	//boxCloseZ = -559;
 
 	//reflOff = 9;
 	baseReflOff = .75;
@@ -141,18 +135,32 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	for (int i = 0; i < num_transmittance; i++) {
 		quartz_transmittance.push_back(tmp_quartz_transmittance[i]);
 	}
+
 	focYoff = 0;
 	focZoff = 0;
 	set_focmirror_nonuniformity(0);
 
+	focYoff_threeSeg1 = 0;
+	focZoff_threeSeg1 = 0;
 
+	focYoff_threeSeg2 = 0;
+	focZoff_threeSeg2 = 0;
+
+	focYoff_threeSeg3 = 0;
+	focZoff_threeSeg3 = 0;
 
 
 	upperWedgeMirrorTop = focMirrorBottom;
-	largePlanarMirrorY = barLength/2.+upperWedgeTop; 
 
+        GlueXUserOptions user_opts;
+        if (user_opts.ReadControl_in(geometry_infile) == 0)
+        {
+                std::cerr << "Reading geometry_infile failed" << std::endl;
+                exit(-1);
+        }
 
-
+        std::map<int, double> opt_val;
+        if (user_opts.Find("upperWedgeMirrorTop", opt_val))     upperWedgeMirrorTop = opt_val[1];
 
 
 
@@ -161,98 +169,100 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	build_readout_box();
 }
 
-void DircThreeSegBoxSim::set_csv_filename(const char* filename)
+void DircThreeSegBoxSim::set_geometry_outfile(const char* filename)
 {
-	csv_filename  = (char*)filename;
-}
-void DircThreeSegBoxSim::set_csv_outputdir(const char* outputdir)
-{
-	csv_outputdir  = (char*)outputdir;
+	geometry_outfile  = (char*)filename;
 }
 
 void DircThreeSegBoxSim::print_model()
 {
 
 	std::ofstream output_csv;
-	output_csv.open(Form("%s/%s",csv_outputdir,csv_filename));
+	output_csv.open(Form("%s",geometry_outfile));
 
 	printf("\n\n*******************************************\n");
 	printf("           DIRC GEOMETRY:            \n\n");
 
 	printf("    Bar Box:\n");
-	printf("  Bar Length (mm): %12.04f\n",barLength);output_csv<<"barLength\t"<<barLength<<"\n";
-	printf("  Bar Width  (mm): %12.04f\n",barWidth);output_csv<<"barWidth\t"<<barWidth<<"\n";
-	printf("  Bar Depth  (mm): %12.04f\n",barDepth);output_csv<<"barDepth\t"<<barDepth<<"\n";
-	printf("  xoff       (mm): %12.04f\n",bar_box_xoff);output_csv<<"bar_box_xoff\t"<<bar_box_xoff<<"\n";
-	printf("  yoff       (mm): %12.04f\n",bar_box_yoff);output_csv<<"bar_box_yoff\t"<<bar_box_yoff<<"\n";
-	printf("  zoff       (mm): %12.04f\n",bar_box_zoff);output_csv<<"bar_box_zoff\t"<<bar_box_zoff<<"\n";
+	printf("  Bar Length (mm): %12.04f\n",barLength);output_csv<<"barLength \t "<<barLength<<"\n";
+	printf("  Bar Width  (mm): %12.04f\n",barWidth);output_csv<<"barWidth \t "<<barWidth<<"\n";
+	printf("  Bar Depth  (mm): %12.04f\n",barDepth);output_csv<<"barDepth \t "<<barDepth<<"\n";
+	printf("  xoff       (mm): %12.04f\n",bar_box_xoff);output_csv<<"bar_box_xoff \t "<<bar_box_xoff<<"\n";
+	printf("  yoff       (mm): %12.04f\n",bar_box_yoff);output_csv<<"bar_box_yoff \t "<<bar_box_yoff<<"\n";
+	printf("  zoff       (mm): %12.04f\n",bar_box_zoff);output_csv<<"bar_box_zoff \t "<<bar_box_zoff<<"\n";
 
 	printf("\n\n    Wedge:\n");
-	printf("  upperWedgeTop        (mm): %12.04f\n",upperWedgeTop);output_csv<<"upperWedgeTop\t"<<upperWedgeTop<<"\n";
-	printf("  upperWedgeBottom     (mm): %12.04f\n",upperWedgeBottom);output_csv<<"upperWedgeBottom\t"<<upperWedgeBottom<<"\n";
-	printf("  upperWedgeHeight     (mm): %12.04f\n",upperWedgeHeight);output_csv<<"upperWedgeHeight\t"<<upperWedgeHeight<<"\n";
-	printf("  upperWedgeDepthHigh  (mm): %12.04f\n",upperWedgeDepthHigh);output_csv<<"upperWedgeDepthHigh\t"<<upperWedgeDepthHigh<<"\n";
-	printf("  upperWedgeGap        (mm): %12.04f\n",upperWedgeGap);output_csv<<"upperWedgeGap\t"<<upperWedgeGap<<"\n";
-	printf("  upperWedgeFarZ       (mm): %12.04f\n",upperWedgeFarZ);output_csv<<"upperWedgeFarZ\t"<<upperWedgeFarZ<<"\n";
-	printf("  wedgeTop             (mm): %12.04f\n",wedgeTop);output_csv<<"wedgeTop\t"<<wedgeTop<<"\n";
-	printf("  wedgeWidthOff        (mm): %12.04f\n",wedgeWidthOff);output_csv<<"wedgeWidthOff\t"<<wedgeWidthOff<<"\n";
-	printf("  wedgeDepthOff        (mm): %12.04f\n",wedgeDepthOff);output_csv<<"wedgeDepthOff\t"<<wedgeDepthOff<<"\n";
-	printf("  wedgeFarAngle       (deg): %12.04f\n",wedgeFarAngle);output_csv<<"wedgeFarAngle\t"<<wedgeFarAngle<<"\n";
-	printf("  wedgeCloseAngle     (deg): %12.04f\n",wedgeCloseAngle);output_csv<<"wedgeCloseAngle\t"<<wedgeCloseAngle<<"\n";
-	printf("  wedgeWidth           (mm): %12.04f\n",wedgeWidth);output_csv<<"wedgeWidth\t"<<wedgeWidth<<"\n";
-	printf("  wedgeHeight          (mm): %12.04f\n",wedgeHeight);output_csv<<"wedgeHeight\t"<<wedgeHeight<<"\n";
-	printf("  wedgeDepthHigh       (mm): %12.04f\n",wedgeDepthHigh);output_csv<<"wedgeDepthHigh\t"<<wedgeDepthHigh<<"\n";
-	printf("  lowerWedgeExtensionZ (mm): %12.04f\n",lowerWedgeExtensionZ);output_csv<<"lowerWedgeExtensionZ\t"<<lowerWedgeExtensionZ<<"\n";
-	printf("  windowThickness      (mm): %12.04f\n",windowThickness);output_csv<<"windowThickness\t"<<windowThickness<<"\n";
-	printf("  upperWedgeMirrorTop  (mm): %12.04f\n",focMirrorBottom);output_csv<<"upperWedgeMirrorTop\t"<<focMirrorBottom<<"\n";
+	printf("  upperWedgeTop        (mm): %12.04f\n",upperWedgeTop);output_csv<<"upperWedgeTop \t "<<upperWedgeTop<<"\n";
+	printf("  upperWedgeBottom     (mm): %12.04f\n",upperWedgeBottom);output_csv<<"upperWedgeBottom \t "<<upperWedgeBottom<<"\n";
+	printf("  upperWedgeHeight     (mm): %12.04f\n",upperWedgeHeight);output_csv<<"upperWedgeHeight \t "<<upperWedgeHeight<<"\n";
+	printf("  upperWedgeDepthHigh  (mm): %12.04f\n",upperWedgeDepthHigh);output_csv<<"upperWedgeDepthHigh \t "<<upperWedgeDepthHigh<<"\n";
+	printf("  upperWedgeGap        (mm): %12.04f\n",upperWedgeGap);output_csv<<"upperWedgeGap \t "<<upperWedgeGap<<"\n";
+	printf("  upperWedgeFarZ       (mm): %12.04f\n",upperWedgeFarZ);output_csv<<"upperWedgeFarZ \t "<<upperWedgeFarZ<<"\n";
+	printf("  wedgeTop             (mm): %12.04f\n",wedgeTop);output_csv<<"wedgeTop \t "<<wedgeTop<<"\n";
+	printf("  wedgeWidthOff        (mm): %12.04f\n",wedgeWidthOff);output_csv<<"wedgeWidthOff \t "<<wedgeWidthOff<<"\n";
+	printf("  wedgeDepthOff        (mm): %12.04f\n",wedgeDepthOff);output_csv<<"wedgeDepthOff \t "<<wedgeDepthOff<<"\n";
+	printf("  wedgeFarAngle       (deg): %12.04f\n",wedgeFarAngle);output_csv<<"wedgeFarAngle \t "<<wedgeFarAngle<<"\n";
+	printf("  wedgeCloseAngle     (deg): %12.04f\n",wedgeCloseAngle);output_csv<<"wedgeCloseAngle \t "<<wedgeCloseAngle<<"\n";
+	printf("  wedgeWidth           (mm): %12.04f\n",wedgeWidth);output_csv<<"wedgeWidth \t "<<wedgeWidth<<"\n";
+	printf("  wedgeHeight          (mm): %12.04f\n",wedgeHeight);output_csv<<"wedgeHeight \t "<<wedgeHeight<<"\n";
+	printf("  wedgeDepthHigh       (mm): %12.04f\n",wedgeDepthHigh);output_csv<<"wedgeDepthHigh \t "<<wedgeDepthHigh<<"\n";
+	printf("  lowerWedgeExtensionZ (mm): %12.04f\n",lowerWedgeExtensionZ);output_csv<<"lowerWedgeExtensionZ \t "<<lowerWedgeExtensionZ<<"\n";
+	printf("  windowThickness      (mm): %12.04f\n",windowThickness);output_csv<<"windowThickness \t "<<windowThickness<<"\n";
+	printf("  upperWedgeMirrorTop  (mm): %12.04f\n",focMirrorBottom);output_csv<<"upperWedgeMirrorTop \t "<<focMirrorBottom<<"\n";
 
 	printf("\n\n    Optical Box:\n\n");
 
 	printf("\n   three-seg mirror:\n");
 	printf("  in place             : %12d\n",three_seg_mirror);
-	printf("  rot             (deg): %12.04f\n",foc_rot);output_csv<<"foc_rot\t"<<foc_rot<<"\n";
-	printf("  focMirrorTop     (mm): %12.04f\n",focMirrorTop);output_csv<<"focMirrorTop\t"<<focMirrorTop<<"\n";
-	printf("  focMirrorBottom  (mm): %12.04f\n",focMirrorBottom);output_csv<<"focMirrorBottom\t"<<focMirrorBottom<<"\n";
-	printf("  focMirrorZDim    (mm): %12.04f\n",focMirrorZDim);output_csv<<"focMirrorZDim\t"<<focMirrorZDim<<"\n";
-	printf("  theta_1  (deg): %12.04f\n",threeSeg_theta_1*rad2deg);output_csv<<"threeSeg_theta_1\t"<<threeSeg_theta_1*rad2deg<<"\n";
-	printf("  theta_2  (deg): %12.04f\n",threeSeg_theta_2*rad2deg);output_csv<<"threeSeg_theta_2\t"<<threeSeg_theta_2*rad2deg<<"\n";
-	printf("  theta_3  (deg): %12.04f\n",threeSeg_theta_3*rad2deg);output_csv<<"threeSeg_theta_3\t"<<threeSeg_theta_3*rad2deg<<"\n";
-	printf("  seg_h     (mm): %12.04f\n",seg_h);output_csv<<"seg_h\t"<<seg_h<<"\n";
-	printf("  seg1Y     (mm): %12.04f\n",threeSeg1Y);output_csv<<"threeSeg1Y\t"<<threeSeg1Y<<"\n";
-	printf("  seg1Z     (mm): %12.04f\n",threeSeg1Z);output_csv<<"threeSeg1Z\t"<<threeSeg1Z<<"\n";
-	printf("  seg2Y     (mm): %12.04f\n",threeSeg2Y);output_csv<<"threeSeg2Y\t"<<threeSeg2Y<<"\n";
-	printf("  seg2Z     (mm): %12.04f\n",threeSeg2Z);output_csv<<"threeSeg2Z\t"<<threeSeg2Z<<"\n";
-	printf("  seg3Y     (mm): %12.04f\n",threeSeg3Y);output_csv<<"threeSeg3Y\t"<<threeSeg3Y<<"\n";
-	printf("  seg3Z     (mm): %12.04f\n",threeSeg3Z);output_csv<<"threeSeg3Z\t"<<threeSeg3Z<<"\n";
-	printf("  seg3Y_end (mm): %12.04f\n",threeSeg3Y_end);output_csv<<"threeSeg3Y_end\t"<<threeSeg3Y_end<<"\n";
-	printf("  seg3Z_end (mm): %12.04f\n",threeSeg3Z_end);output_csv<<"threeSeg3Z_end\t"<<threeSeg3Z_end<<"\n";
-	printf("  Yoff      (mm): %12.04f\n",focYoff);output_csv<<"focYoff\t"<<focYoff<<"\n";
-	printf("  Zoff      (mm): %12.04f\n",focZoff);output_csv<<"focZoff\t"<<focZoff<<"\n";
-	printf("  Yrot     (deg): %12.04f\n",foc_yrot);output_csv<<"foc_yrot\t"<<foc_yrot<<"\n";
-	printf("  Zrot     (deg): %12.04f\n",foc_zrot);output_csv<<"foc_zrot\t"<<foc_zrot<<"\n";
-	printf("  size      (mm): %12.04f\n",foc_mirror_size);output_csv<<"foc_mirror_size\t"<<foc_mirror_size<<"\n";
-	printf("  r         (mm): %12.04f\n",foc_r);output_csv<<"foc_r\t"<<foc_r<<"\n";
+	printf("  rot             (deg): %12.04f\n",foc_rot);output_csv<<"foc_rot \t "<<foc_rot<<"\n";
+	printf("  focMirrorTop     (mm): %12.04f\n",focMirrorTop);output_csv<<"focMirrorTop \t "<<focMirrorTop<<"\n";
+	printf("  focMirrorBottom  (mm): %12.04f\n",focMirrorBottom);output_csv<<"focMirrorBottom \t "<<focMirrorBottom<<"\n";
+	printf("  focMirrorZDim    (mm): %12.04f\n",focMirrorZDim);output_csv<<"focMirrorZDim \t "<<focMirrorZDim<<"\n";
+	printf("  theta_1  (deg): %12.04f\n",threeSeg_theta_1*rad2deg);output_csv<<"threeSeg_theta_1 \t "<<threeSeg_theta_1*rad2deg<<"\n";
+	printf("  theta_2  (deg): %12.04f\n",threeSeg_theta_2*rad2deg);output_csv<<"threeSeg_theta_2 \t "<<threeSeg_theta_2*rad2deg<<"\n";
+	printf("  theta_3  (deg): %12.04f\n",threeSeg_theta_3*rad2deg);output_csv<<"threeSeg_theta_3 \t "<<threeSeg_theta_3*rad2deg<<"\n";
+	printf("  seg_h     (mm): %12.04f\n",seg_h);output_csv<<"seg_h \t "<<seg_h<<"\n";
+	printf("  seg1Y     (mm): %12.04f\n",threeSeg1Y);output_csv<<"threeSeg1Y \t "<<threeSeg1Y<<"\n";
+	printf("  seg1Z     (mm): %12.04f\n",threeSeg1Z);output_csv<<"threeSeg1Z \t "<<threeSeg1Z<<"\n";
+	printf("  seg1Y_end (mm): %12.04f\n",threeSeg1Y_end);output_csv<<"threeSeg1Y_end \t "<<threeSeg1Y_end<<"\n";
+	printf("  seg1Z_end (mm): %12.04f\n",threeSeg1Z_end);output_csv<<"threeSeg1Z_end \t "<<threeSeg1Z_end<<"\n";
+	printf("  seg2Y     (mm): %12.04f\n",threeSeg2Y);output_csv<<"threeSeg2Y \t "<<threeSeg2Y<<"\n";
+	printf("  seg2Z     (mm): %12.04f\n",threeSeg2Z);output_csv<<"threeSeg2Z \t "<<threeSeg2Z<<"\n";
+	printf("  seg2Y_end (mm): %12.04f\n",threeSeg2Y_end);output_csv<<"threeSeg2Y_end \t "<<threeSeg2Y_end<<"\n";
+	printf("  seg2Z_end (mm): %12.04f\n",threeSeg2Z_end);output_csv<<"threeSeg2Z_end \t "<<threeSeg2Z_end<<"\n";
+	printf("  seg3Y     (mm): %12.04f\n",threeSeg3Y);output_csv<<"threeSeg3Y \t "<<threeSeg3Y<<"\n";
+	printf("  seg3Z     (mm): %12.04f\n",threeSeg3Z);output_csv<<"threeSeg3Z \t "<<threeSeg3Z<<"\n";
+	printf("  seg3Y_end (mm): %12.04f\n",threeSeg3Y_end);output_csv<<"threeSeg3Y_end \t "<<threeSeg3Y_end<<"\n";
+	printf("  seg3Z_end (mm): %12.04f\n",threeSeg3Z_end);output_csv<<"threeSeg3Z_end \t "<<threeSeg3Z_end<<"\n";
+	printf("  Yoff      (mm): %12.04f\n",focYoff);output_csv<<"focYoff \t "<<focYoff<<"\n";
+	printf("  Zoff      (mm): %12.04f\n",focZoff);output_csv<<"focZoff \t "<<focZoff<<"\n";
+	printf("  Yrot     (deg): %12.04f\n",foc_yrot);output_csv<<"foc_yrot \t "<<foc_yrot<<"\n";
+	printf("  Zrot     (deg): %12.04f\n",foc_zrot);output_csv<<"foc_zrot \t "<<foc_zrot<<"\n";
+	printf("  size      (mm): %12.04f\n",foc_mirror_size);output_csv<<"foc_mirror_size \t "<<foc_mirror_size<<"\n";
+	printf("  r         (mm): %12.04f\n",foc_r);output_csv<<"foc_r \t "<<foc_r<<"\n";
 
 	printf("\n   Big Flat Mirror:\n");
-	printf("  minZ  (mm): %12.04f\n",largePlanarMirrorMinZ);output_csv<<"largePlanarMirrorMinZ\t"<<largePlanarMirrorMinZ<<"\n";
-	printf("  maxZ  (mm): %12.04f\n",largePlanarMirrorMaxZ);output_csv<<"largePlanarMirrorMaxZ\t"<<largePlanarMirrorMaxZ<<"\n";
-	printf("  Y     (mm): %12.04f\n",largePlanarMirrorY);output_csv<<"largePlanarMirrorY\t"<<largePlanarMirrorY<<"\n";
+	printf("  minZ  (mm): %12.04f\n",largePlanarMirrorMinZ);output_csv<<"largePlanarMirrorMinZ \t "<<largePlanarMirrorMinZ<<"\n";
+	printf("  maxZ  (mm): %12.04f\n",largePlanarMirrorMaxZ);output_csv<<"largePlanarMirrorMaxZ \t "<<largePlanarMirrorMaxZ<<"\n";
+	printf("  Y     (mm): %12.04f\n",largePlanarMirrorY);output_csv<<"largePlanarMirrorY \t "<<largePlanarMirrorY<<"\n";
 
 	printf("\n   Side mirrors::\n");
-	printf("  xl (mm): %12.04f\n",sidemirror_xl);output_csv<<"sidemirror_xl\t"<<sidemirror_xl<<"\n";
-	printf("  xr (mm): %12.04f\n",sidemirror_xr);output_csv<<"sidemirror_xr\t"<<sidemirror_xr<<"\n";
+	printf("  xl (mm): %12.04f\n",sidemirror_xl);output_csv<<"sidemirror_xl \t "<<sidemirror_xl<<"\n";
+	printf("  xr (mm): %12.04f\n",sidemirror_xr);output_csv<<"sidemirror_xr \t "<<sidemirror_xr<<"\n";
 
 	printf("\n   PMT plane:\n");
-	printf("  rot             (deg): %12.04f\n",sens_rot);output_csv<<"sens_rot\t"<<sens_rot<<"\n";
-	printf("  Y                (mm): %12.04f\n",sensPlaneY);output_csv<<"sensPlaneY\t"<<sensPlaneY<<"\n";
-	printf("  Z                (mm): %12.04f\n",sensPlaneZ);output_csv<<"sensPlaneZ\t"<<sensPlaneZ<<"\n";
-	printf("  reflOff          (mm): %12.04f\n",reflOff);output_csv<<"reflOff\t"<<reflOff<<"\n";
-	printf("  minZ             (mm): %12.04f\n",pmtPlaneMinZ);output_csv<<"pmtPlaneMinZ\t"<<pmtPlaneMinZ<<"\n";
-	printf("  maxZ             (mm): %12.04f\n",pmtPlaneMaxZ);output_csv<<"pmtPlaneMaxZ\t"<<pmtPlaneMaxZ<<"\n";
-	printf("  boxCloseZ        (mm): %12.04f\n",boxCloseZ);output_csv<<"boxCloseZ\t"<<boxCloseZ<<"\n";
-	printf("  unReflSensPlaneY (mm): %12.04f\n",unReflSensPlaneY);output_csv<<"unReflSensPlaneY\t"<<unReflSensPlaneY<<"\n";
-	printf("  unReflSensPlaneZ (mm): %12.04f\n",unReflSensPlaneZ);output_csv<<"unReflSensPlaneZ\t"<<unReflSensPlaneZ<<"\n";
-	printf("  size             (mm): %12.04f\n",sens_size);output_csv<<"sens_size\t"<<sens_size<<"\n";
+	printf("  rot             (deg): %12.04f\n",sens_rot);output_csv<<"sens_rot \t "<<sens_rot<<"\n";
+	printf("  Y                (mm): %12.04f\n",sensPlaneY);output_csv<<"sensPlaneY \t "<<sensPlaneY<<"\n";
+	printf("  Z                (mm): %12.04f\n",sensPlaneZ);output_csv<<"sensPlaneZ \t "<<sensPlaneZ<<"\n";
+	printf("  reflOff          (mm): %12.04f\n",reflOff);output_csv<<"reflOff \t "<<reflOff<<"\n";
+	printf("  minZ             (mm): %12.04f\n",pmtPlaneMinZ);output_csv<<"pmtPlaneMinZ \t "<<pmtPlaneMinZ<<"\n";
+	printf("  maxZ             (mm): %12.04f\n",pmtPlaneMaxZ);output_csv<<"pmtPlaneMaxZ \t "<<pmtPlaneMaxZ<<"\n";
+	printf("  boxCloseZ        (mm): %12.04f\n",boxCloseZ);output_csv<<"boxCloseZ \t "<<boxCloseZ<<"\n";
+	printf("  unReflSensPlaneY (mm): %12.04f\n",unReflSensPlaneY);output_csv<<"unReflSensPlaneY \t "<<unReflSensPlaneY<<"\n";
+	printf("  unReflSensPlaneZ (mm): %12.04f\n",unReflSensPlaneZ);output_csv<<"unReflSensPlaneZ \t "<<unReflSensPlaneZ<<"\n";
+	printf("  sensPlaneY       (mm): %12.04f\n",sensPlaneY);output_csv<<"sensPlaneY \t "<<sensPlaneY<<"\n";
+	printf("  sensPlaneZ       (mm): %12.04f\n",sensPlaneZ);output_csv<<"sensPlaneZ \t "<<sensPlaneZ<<"\n";
+	printf("  size             (mm): %12.04f\n",sens_size);output_csv<<"sens_size \t "<<sens_size<<"\n";
 
 	printf("\n   END OF DIRC GEOMETRY PRINTOUT \n");
 	printf("*******************************************\n\n");
@@ -317,6 +327,7 @@ void DircThreeSegBoxSim::build_readout_box()
 	build_system();
 	fill_threeseg_plane_vecs();
 	fill_foc_mirror_vecs();
+	fill_largePlanarMirror_plane_vecs();
 	fill_sens_plane_vecs();
 	//still rebuild wedge and bars when this is called:
 }
@@ -337,44 +348,71 @@ void DircThreeSegBoxSim::set_large_mirror_zs(double imin, double imax)
 	largePlanarMirrorMaxZ = imax;
 }
 void DircThreeSegBoxSim::fill_sens_plane_vecs() {
-	//double adjusted_sens_size = 312;
+
+        GlueXUserOptions user_opts;
+        if (user_opts.ReadControl_in(geometry_infile) == 0)
+        {
+                std::cerr << "Reading geometry_infile failed" << std::endl;
+                exit(-1);
+        }
+
+        std::map<int, double> opt_sens;
+
+        if (user_opts.Find("unReflSensPlaneY", opt_sens))     unReflSensPlaneY = opt_sens[1];
+        if (user_opts.Find("unReflSensPlaneZ", opt_sens))     unReflSensPlaneZ = opt_sens[1];
+        if (user_opts.Find("pmtPlaneMinZ",     opt_sens))     pmtPlaneMinZ = opt_sens[1];
+        if (user_opts.Find("pmtPlaneMaxZ",     opt_sens))     pmtPlaneMaxZ = opt_sens[1];
+
+	sensPlaneY = unReflSensPlaneY - 2 * (unReflSensPlaneY - largePlanarMirrorY);
+	sensPlaneZ = unReflSensPlaneZ;
+	
+	boxCloseZ = unReflSensPlaneZ;
+
+/*
+	sensPlaneZ = boxCloseZ;
+	sensPlaneY = -reflOff+barLength/2 + upperWedgeTop;
+
+        unReflSensPlaneY = reflOff + barLength/2 + upperWedgeTop;
+        unReflSensPlaneZ = boxCloseZ;
+*/
 
 	sensPlaneNx = 0;
 	sensPlaneNy = sin(sens_rot/57.3);
 	sensPlaneNz = cos(sens_rot/57.3);
-
-	//boxCloseZ  = -559;
-
-	//sensPlaneY = -adjusted_sens_size*sin(sens_rot/57.3)/2-reflOff+barLength/2;
-	//sensPlaneY = -adjusted_sens_size*sin(sens_rot/57.3)/2-reflOff+barLength/2;
-	//sensPlaneZ = boxCloseZ + sens_size*cos(sens_rot/57.3)/2;
-	sensPlaneY = -reflOff+barLength/2 + upperWedgeTop;
-	sensPlaneZ = boxCloseZ;
-
-/*
-	double move_diff = 0/2;
-	double move_same = 4.5;
-	sensPlaneY = -reflOff+barLength/2 + upperWedgeTop + move_same - move_diff;
-	sensPlaneZ = boxCloseZ + move_same + move_diff;
-*/	
-
 	sensPlaneD = sensPlaneNy*sensPlaneY + sensPlaneNz*sensPlaneZ;
 
-        //unReflSensPlaneY = adjusted_sens_size*sin(sens_rot/57.3)/2 + reflOff + barLength/2;
-        //unReflSensPlaneZ = boxCloseZ + sens_size*cos(sens_rot/57.3)/2;
-        unReflSensPlaneY = reflOff + barLength/2 + upperWedgeTop;
-        unReflSensPlaneZ = boxCloseZ;
         unReflSensPlaneNx = 0;
         unReflSensPlaneNy = -sensPlaneNy;
         unReflSensPlaneNz = sensPlaneNz;
-
         unReflSensPlaneD = unReflSensPlaneNy*unReflSensPlaneY + unReflSensPlaneNz*unReflSensPlaneZ;
-
-//	sensPlaneYdistConversion = 1/cos(sens_rot/57.3);
-//	sensPlaneZdistConversion = 1/sin(sens_rot/57.3);
 
 	sensPlaneYdistConversion = 1/sin(sens_rot/57.3);
 	sensPlaneZdistConversion = 1/cos(sens_rot/57.3);
+}
+void DircThreeSegBoxSim::fill_largePlanarMirror_plane_vecs() {
+
+        GlueXUserOptions user_opts;
+        if (user_opts.ReadControl_in(geometry_infile) == 0)
+        {
+                std::cerr << "Reading geometry_infile failed" << std::endl;
+                exit(-1);
+        }
+
+        std::map<int, double> opt_val;
+        if (user_opts.Find("largePlanarMirrorY", opt_val))      largePlanarMirrorY     = opt_val[1];
+        if (user_opts.Find("largePlanarMirrorMinZ", opt_val))   largePlanarMirrorMinZ  = opt_val[1];
+        if (user_opts.Find("largePlanarMirrorMaxZ", opt_val))   largePlanarMirrorMaxZ  = opt_val[1];
+
+        largePlanarMirrorNx = 0; 
+        largePlanarMirrorNy = 1;
+        largePlanarMirrorNz = 0;
+/*
+        largePlanarMirrorD = upperWedgeTop + barLength/2;
+        largePlanarMirrorMinZ = -559;
+        largePlanarMirrorMaxZ = -130;
+*/
+	largePlanarMirrorD = largePlanarMirrorY;
+
 }
 void DircThreeSegBoxSim::set_sidemirror_reflectivity(double isr) {
 	sidemirror_reflectivity = isr;
@@ -401,6 +439,7 @@ void DircThreeSegBoxSim::fill_foc_mirror_vecs() {
 	//printf("%12.04f %12.04f %12.04f %12.04f\n",foc_rot,foc_mirror_size,foc_r,foc_center_ang);
 }
 void DircThreeSegBoxSim::fill_threeseg_plane_vecs() {
+/*
 	focMirrorTop = focMirrorBottom + foc_mirror_size*cos(foc_rot/57.3);
 	focMirrorZDim = foc_mirror_size*sin(foc_rot/57.3);
 	//If we ever go to more than 3 segments, use a loop
@@ -414,12 +453,6 @@ void DircThreeSegBoxSim::fill_threeseg_plane_vecs() {
 	threeSeg_theta_2 = theta_m;
 	threeSeg_theta_3 = theta_m + theta_c/3;
 
-/*
-	seg_h = 96.;
-	threeSeg_theta_1 = (90. - 22.8935) / rad2deg;
-	threeSeg_theta_2 = (90. - 15.9803) / rad2deg;
-	threeSeg_theta_3 = (90. - 9.067)   / rad2deg;
-*/
 	threeSeg1Y = focMirrorBottom + focYoff;
 	threeSeg1Z = 0 + focZoff;
 
@@ -431,6 +464,42 @@ void DircThreeSegBoxSim::fill_threeseg_plane_vecs() {
 
 	threeSeg3Y_end = threeSeg3Y + seg_h*cos(threeSeg_theta_3);
 	threeSeg3Z_end = threeSeg3Z - seg_h*sin(threeSeg_theta_3);
+*/
+
+        GlueXUserOptions user_opts;
+        if (user_opts.ReadControl_in(geometry_infile) == 0)
+        {
+                std::cerr << "Reading geometry_infile failed" << std::endl;
+                exit(-1);
+        }
+
+        std::map<int, double> opt_threeSeg;
+
+        if (user_opts.Find("threeSeg_theta_1", opt_threeSeg))      threeSeg_theta_1 = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg_theta_2", opt_threeSeg))      threeSeg_theta_2 = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg_theta_3", opt_threeSeg))      threeSeg_theta_3 = opt_threeSeg[1];
+
+        if (user_opts.Find("threeSeg1Z", opt_threeSeg))      threeSeg1Z     = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg1Y", opt_threeSeg))      threeSeg1Y     = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg1Z_end", opt_threeSeg))  threeSeg1Z_end = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg1Y_end", opt_threeSeg))  threeSeg1Y_end = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg2Z", opt_threeSeg))      threeSeg2Z     = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg2Y", opt_threeSeg))      threeSeg2Y     = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg2Z_end", opt_threeSeg))  threeSeg2Z_end = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg2Y_end", opt_threeSeg))  threeSeg2Y_end = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg3Z", opt_threeSeg))      threeSeg3Z     = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg3Y", opt_threeSeg))      threeSeg3Y     = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg3Z_end", opt_threeSeg))  threeSeg3Z_end = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg3Y_end", opt_threeSeg))  threeSeg3Y_end = opt_threeSeg[1];
+
+	threeSeg1Y += focYoff_threeSeg1;
+	threeSeg1Z += focZoff_threeSeg1;
+
+	threeSeg2Y += focYoff_threeSeg2;
+	threeSeg2Z += focZoff_threeSeg2;
+
+	threeSeg3Y += focYoff_threeSeg3;
+	threeSeg3Z += focZoff_threeSeg3;
 
 	threeSeg1Nx = 0;
 	threeSeg1Ny = sin(threeSeg_theta_1);
@@ -653,7 +722,8 @@ double DircThreeSegBoxSim::warp_box(\
 		//Condition may not be needed - try without for speed later
 		dt = -z/dz;
 
-		if (y + dy*dt < focMirrorBottom) {
+		//if (y + dy*dt < focMirrorBottom) {
+		if (y + dy*dt < upperWedgeMirrorTop) {
 			//removes inner "ears"
 			//z = 1337;
 			//return -1;
@@ -737,8 +807,10 @@ double DircThreeSegBoxSim::three_seg_reflect(\
 			dy,\
 			dz);
 	double offang = 0;
-	if (tz > threeSeg2Z && tz < 0) {
+	//if (tz > threeSeg2Z && tz < 0) {
+	if (tz > threeSeg1Z_end && tz < threeSeg1Z) {
 		//reflect off mirror closest to box
+		//printf("reflecting off of threeSeg1...\n");
 		if (nonUniformFocMirror == true) {
 			//obviously not in the real run
 			offang = rand_gen->Gaus(0,foc_mirror_nonuni/57.3);
@@ -777,7 +849,9 @@ double DircThreeSegBoxSim::three_seg_reflect(\
 			dy,\
 			dz);
 	// 	printf("tz2: %12.04f\n",tz);
-	if (tz > threeSeg3Z && tz < 0) {
+	//if (tz > threeSeg3Z && tz < 0) {
+	if (tz > threeSeg2Z_end && tz < threeSeg2Z) {
+		//printf("reflecting off of threeSeg2...\n");
 		//reflect off middle mirror
 		if (nonUniformFocMirror == true) {
 			//obviously not in the real run
@@ -818,7 +892,9 @@ double DircThreeSegBoxSim::three_seg_reflect(\
 			dy,\
 			dz);
 	// 	printf("tz3: %12.04f\n",tz);
-	if (tz > -focMirrorZDim && tz < 0) {
+	//if (tz > -focMirrorZDim && tz < 0) {
+	if (tz > threeSeg3Z_end && tz < threeSeg3Z) {
+		//printf("reflecting off of threeSeg3...\n");
 		//reflect off mirror closest to box
 		if (nonUniformFocMirror == true) {
 			//obviously not in the real run
@@ -850,6 +926,7 @@ double DircThreeSegBoxSim::three_seg_reflect(\
 	z = 1337;
 	return -1;
 }
+
 double DircThreeSegBoxSim::cylindrical_reflect(\
 		double &x,\
 		double &y,\
@@ -1031,6 +1108,7 @@ double DircThreeSegBoxSim::warp_sens_plane(\
 			//Should not happen
 			printf("strange things happening in roundabout reflection\n");
 			z = 1337;
+			//exit(-1);
 			return 100000;
 		}
 		//propagate back to plane directly in front 
@@ -1123,22 +1201,14 @@ double DircThreeSegBoxSim::warp_sens_plane(\
 		//Assumes all Photons bounce - not exatly true, but close
 		side_photon_angles.push_back(57.3*acos(dx));
 	}
-	
-	//printf("sens_norm: %12.04f\n",180 - acos(dx*sensPlaneNx+dy*sensPlaneNy+dz*sensPlaneNz)*57.3);
-	//printf("%12.04f %12.04f %12.04f\n",sensPlaneNx,sensPlaneNy,sensPlaneNz);
 
-//	printf("Out XYZ: %12.04f %12.04f %12.04f\n",x,barLength/2 + 2*upperWedgeTop + reflOff - y,z+barDepth/2);
-
-//	printf("hitxyz: %12.04f %12.04f %12.04f\n",x,barLength/2 + 2*upperWedgeTop + reflOff - y,z+barDepth/2);
-
+/*	
 	fill_val.x = x + 5;
-	//fill_val.y = (y-sensPlaneY)*sensPlaneYdistConversion;
-
 	fill_val.y = (-z-559)*sensPlaneYdistConversion + 240 + 16;
-	//if (tmpz > largePlanarMirrorMaxZ)
-	{
-//		printf("%12.04f %12.04f\n",z,dz);
-	}
+*/
+	fill_val.x = x ;
+	fill_val.y = (z - pmtPlaneMinZ)*sensPlaneYdistConversion;
+
 	return rval*liquidIndex;
 }
 

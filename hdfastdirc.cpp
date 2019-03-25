@@ -32,8 +32,11 @@ int main(int nargs, char* argv[])
 	/**************************************************************************/
 
 	bool SIM_ONLY = 1;
+	char* geometry_infilename = new char[256];
+	sprintf(geometry_infilename, "FastDIRC_geometry_input.csv");
 
 	const char* config_str;
+
 
 	double energy = 4.5;
 	double kmass = .4937;
@@ -43,7 +46,7 @@ int main(int nargs, char* argv[])
 	double particle_y = 0;
 	double particle_theta = 0;
 	double particle_phi = 0;
-	double particle_bar = 0;
+	double particle_bar = 2;
 
 	double particle_flight_distance = 0;
 
@@ -138,6 +141,9 @@ int main(int nargs, char* argv[])
 	char* rootfilename = new char[256];
 	sprintf(rootfilename,"fitdirc.root");
 
+	char* geometry_outfilename = new char[256];
+	sprintf(geometry_outfilename,"dirc_model_geometry.csv");
+
 	double res_enhance = 1;
 	TH1F *pion_dist_x = new TH1F("pion_dist_x","x val of intercepted points - pion",(maxx-minx)/(res_enhance*resx),minx,maxx);
 	TH1F *pion_dist_y = new TH1F("pion_dist_y","y val of intercepted points - pion",(maxy-miny)/(res_enhance*resy),miny,maxy);
@@ -183,14 +189,18 @@ int main(int nargs, char* argv[])
 	if (user_opts.Find("SIM_ONLY", opt_SIM_ONLY)) SIM_ONLY = opt_SIM_ONLY[1];
 	printf("SIM_ONLY = %d \n",SIM_ONLY);
 
-	std::map<int, std::string> opt_of;
-	if (user_opts.Find("OUTFILE", opt_of)) sprintf(rootfilename,"%s",opt_of[1].c_str());
+	std::map<int, std::string> opt_str;
+	if (user_opts.Find("OUTFILE", opt_str)) sprintf(rootfilename,"%s",opt_str[1].c_str());
 	printf("OUTFILE = %s \n", rootfilename);
 
 	std::map<int, double> opt_energy;
 	if (user_opts.Find("E", opt_energy)) energy = opt_energy[1];
-	printf("energy = %12.04f \n",energy);
+	printf("energy = %8.02f \n",energy);
 
+	if (user_opts.Find("GEOMETRY_INFILE", opt_str)) sprintf(geometry_infilename,"%s",opt_str[1].c_str());
+	printf("GEOMETRY_INFILE = %s \n",geometry_infilename);
+
+	if (user_opts.Find("GEOMETRY_OUTFILE", opt_str)) sprintf(geometry_outfilename,"%s",opt_str[1].c_str());
 
 	/**************************************************************************/
 	/***********              APPLY CONFIG                 ********************/
@@ -223,13 +233,14 @@ int main(int nargs, char* argv[])
 			foc_mirror_size,\
 			main_mirror_angle_nominal,\
 			600,\
-			pmt_angle_nominal);
+			pmt_angle_nominal,\
+			geometry_infilename);
 
 	dirc_model->set_sidemirror(sm_xr,sm_xl);
-	dirc_model->set_pmt_plane_zs(pmt_min_z,pmt_max_z);
-	dirc_model->set_large_mirror_zs(large_mirror_min_z,large_mirror_max_z);
-	dirc_model->set_focmirror_nonuniformity(main_mirror_nonuniformity);
-	dirc_model->set_wedge_mirror_rand(wedge_non_uniformity);
+	//dirc_model->set_pmt_plane_zs(pmt_min_z,pmt_max_z);
+	//dirc_model->set_large_mirror_zs(large_mirror_min_z,large_mirror_max_z);
+	//dirc_model->set_focmirror_nonuniformity(main_mirror_nonuniformity);
+	//dirc_model->set_wedge_mirror_rand(wedge_non_uniformity);
 
 
 	//various running condition controls
@@ -273,6 +284,7 @@ int main(int nargs, char* argv[])
 						 bar_box_yoff,\
 						 bar_box_zoff);
 
+	dirc_model->set_geometry_outfile(geometry_outfilename);
 	dirc_model->print_model();
 
 	printf("\n DIRC model all set. Begin running.\n");

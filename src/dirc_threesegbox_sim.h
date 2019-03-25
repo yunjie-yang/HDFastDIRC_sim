@@ -10,56 +10,67 @@
 class DircThreeSegBoxSim : public DircBaseSim
 {
 protected:
+	// three-seg mirrors / focMirror
+
+	bool three_seg_mirror;
+
 	double foc_r;
 	double foc_mirror_size;
 	double foc_rot;
-	double foc_yrot;
-	double foc_zrot;
-	double sens_size;
-	double sens_rot;
 
-	double largePlanarMirrorNx;
-	double largePlanarMirrorNy;
-	double largePlanarMirrorNz;
-	double largePlanarMirrorD;
-	double largePlanarMirrorMinZ;
-	double largePlanarMirrorMaxZ;
-	double pmtPlaneMinZ;
-	double pmtPlaneMaxZ;
+        double focMirrorBottom;
+        double focMirrorTop;
+        double focMirrorZDim;
 
-	double upperWedgeMirrorTop;
-	double largePlanarMirrorY;
+        double threeSeg1Nx,threeSeg1Ny,threeSeg1Nz,threeSeg1D;
+        double threeSeg2Nx,threeSeg2Ny,threeSeg2Nz,threeSeg2D;
+        double threeSeg3Nx,threeSeg3Ny,threeSeg3Nz,threeSeg3D;
 
+        double threeSeg1_2dny,threeSeg1_2dnz,threeSeg1_2dd;
+        double threeSeg2_2dny,threeSeg2_2dnz,threeSeg2_2dd;
+        double threeSeg3_2dny,threeSeg3_2dnz,threeSeg3_2dd;
 
-	//Additions to threeSeg
+        double threeSeg1Y,threeSeg1Z;
+        double threeSeg2Y,threeSeg2Z;
+        double threeSeg3Y,threeSeg3Z;
+        double threeSeg1Y_end,threeSeg1Z_end;
+        double threeSeg2Y_end,threeSeg2Z_end;
+	double threeSeg3Y_end,threeSeg3Z_end;
+
 	double threeSeg_theta_1;
 	double threeSeg_theta_2;
 	double threeSeg_theta_3;
 	double seg_h;
-	double threeSeg3Y_end,threeSeg3Z_end;
-	
-	double focMirrorBottom;
-	double focMirrorTop;
-	double focMirrorZDim;
-	//Multiseg?  probably not.  If it goes up again, use arrays
 
-	double threeSeg1Nx,threeSeg1Ny,threeSeg1Nz,threeSeg1D;
-	double threeSeg2Nx,threeSeg2Ny,threeSeg2Nz,threeSeg2D;
-	double threeSeg3Nx,threeSeg3Ny,threeSeg3Nz,threeSeg3D;
 	
-	//Not yet used - implement to branch faster on the threeseg
-	double threeSeg1_2dny,threeSeg1_2dnz,threeSeg1_2dd;
-	double threeSeg2_2dny,threeSeg2_2dnz,threeSeg2_2dd;
-	double threeSeg3_2dny,threeSeg3_2dnz,threeSeg3_2dd;
-	
-	double threeSeg1Y,threeSeg1Z;
-	double threeSeg2Y,threeSeg2Z;
-	double threeSeg3Y,threeSeg3Z;
-	
+	double focYoff;
+	double focZoff;
+
+	double foc_yrot;
+	double foc_zrot;
+
+	double focYoff_threeSeg1;
+	double focZoff_threeSeg1;
+
+	double focYoff_threeSeg2;
+	double focZoff_threeSeg2;
+
+	double focYoff_threeSeg3;
+	double focZoff_threeSeg3;
+
 	bool nonUniformFocMirror;
 	double foc_mirror_nonuni;
-	
-	
+
+	// PMT Plane / sensPlane
+	double sens_size;
+	double sens_rot;
+
+	double pmtPlaneMinZ;
+	double pmtPlaneMaxZ;
+
+	double sensPlaneYdistConversion;
+	double sensPlaneZdistConversion;
+
 	double sensPlaneNx;
 	double sensPlaneNy;
 	double sensPlaneNz;
@@ -74,17 +85,41 @@ protected:
 	double unReflSensPlaneY;
 	double unReflSensPlaneZ;
 
+
+	// large Planar mirror / FTMS(N)
+        double largePlanarMirrorNx;
+        double largePlanarMirrorNy;
+        double largePlanarMirrorNz;
+        double largePlanarMirrorD;
+        double largePlanarMirrorMinZ;
+        double largePlanarMirrorMaxZ;
+
+
+	// side mirrors
+	double sidemirror_xr;
+	double sidemirror_xl;
+	double sidemirror_reflectivity;
+
+
+	//additions to adapt to GlueX geometry:
+	double upperWedgeMirrorTop;
+	double largePlanarMirrorY;
+
+	// I/O
+	char* geometry_outfile  = new char[256];
+	char* geometry_infile   = new char[256];
+
+
+
+
+
+	/* ----------------------------------------------------- */	
+
         double focPlaneNx;
         double focPlaneNy;
         double focPlaneNz;
         double focPlaneD;
         double focPlaneMinZ;
-
-	double focYoff;
-	double focZoff;
-
-	double sensPlaneYdistConversion;
-	double sensPlaneZdistConversion;
 
 	double boxCloseZ;
 	double reflOff;
@@ -92,12 +127,6 @@ protected:
 	
 	double focMirrorY;
 	double focMirrorZ;
-	
-	bool three_seg_mirror;
-	
-	double sidemirror_xr;
-	double sidemirror_xl;
-	double sidemirror_reflectivity;
 	
 	double quartzLiquidY;
 	
@@ -122,7 +151,6 @@ protected:
 	int num_QE;
 	std::vector<double> vals_QE;
 
-
 	double min_transmittance,max_transmittance,sep_transmittance;
 	int num_transmittance;
 
@@ -130,6 +158,7 @@ protected:
 	void build_readout_box();
 	void fill_sens_plane_vecs();
 	void fill_threeseg_plane_vecs();
+	void fill_largePlanarMirror_plane_vecs();
 	void fill_foc_mirror_vecs();
 	void sidemirror_reflect_points(std::vector<dirc_point> &points);
 	void spread_wedge_mirror();
@@ -177,10 +206,6 @@ protected:
                 double &dy,\
                 double &dz);
 
-	char* csv_outputdir = new char[256];
-	char* csv_filename  = new char[64];
-
-
 public:
 	double get_cerenkov_angle_rand(double beta, double additional_spread, double &wavelength);
 	
@@ -212,15 +237,13 @@ public:
 		double ifoc_rot = 74.11, \
 		double isens_size = 600, \
 		double isens_rot = 47.87,\
+		const char* igeometry_infile = "",\
                 double ibar_length=4900,\
 		double ibar_width=35,\
                 double ibar_depth=17.25,\
                 double iupper_wedge_top = 178.6);
 
 	void print_model();
-	//void set_outcsvinfo(std::string filename, std::string outputdir);
-	//void set_outcsvinfo(char* filename, char* outputdir);
-	void set_csv_filename(const char* filename);
-	void set_csv_outputdir(const char* outputdir);
+	void set_geometry_outfile(const char* filename);
 };
 #endif

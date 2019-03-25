@@ -21,13 +21,14 @@ private:
         int PMT_ROWS = 18;
         int PMT_COLUMNS = 6;
 	
-	double PIXEL_SIZE = 6;
-	double PIXEL_GAP  = 0.06;
-	double PMT_GAP    = 4.58;
-	double PMT_SIZE   = PIXEL_SIZE * 8 + PIXEL_GAP * 7;
+	double PIXEL_SIZE   = 6;
+	double PIXEL_GAP    = 0.06;
+	double PMT_GAP      = 4.58;
+	double PMT_SIZE     = PIXEL_SIZE * 8 + PIXEL_GAP * 7;
 	double PMT_SIZE_GAP = PMT_SIZE + PMT_GAP;
 
 	int find_pixel_row(double x);
+	int find_pixel_col(double y);
 	
 public:
 	DircRectDigitizer(\
