@@ -5,7 +5,7 @@ INCLUDE = -I./src/
 
 CFLAGS = $(CFLAGS_BASE) $(goptical_CPPFLAGS)
 
-LIBLOC = ./lib/
+LIBLOC = ./lib
 #OUT = ./hdfastdirc_sim
 OUT = ./hdfastdirc
 
