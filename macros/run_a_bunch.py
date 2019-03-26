@@ -11,7 +11,7 @@ def read_control_in(infile):
 
 
 def main():
-    output_dir_top = "/media/sf_SharedFolderVM/FastDIRC_geometry/outputs"
+    output_dir_top = "/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/OutOfBox"
     exec_dir = "/home/yunjiey/Documents/HDFastDIRC_sim"
 
     for bar_i in range(12):
