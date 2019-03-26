@@ -31,6 +31,7 @@ def main():
 
         lines.append("SIM_ONLY  1\n")
         lines.append("OUTFILE  '%s/hist_bar_%d.root'\n"%(output_dir_bar,bar_i))
+        lines.append("GEOMETRY_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/FastDIRC_HDDS_Nominal.csv'\n")
         lines.append("GEOMETRY_OUTFILE  '%s/dirc_model_geometry_bar_%d.csv'\n"%(output_dir_bar,bar_i))
         lines.append("PARTICLE_BAR  %.01f\n"%bar_i)
 	lines.append("END \n")

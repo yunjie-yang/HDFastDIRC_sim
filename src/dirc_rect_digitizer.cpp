@@ -65,8 +65,8 @@ void DircRectDigitizer::digitize_point(dirc_point &pt)
 	}
 
 	//Converting to as-built config
-        int xhit = find_pixel_row(x);
-        int yhit = find_pixel_col(y);
+        int xhit = find_pixel(x);
+        int yhit = find_pixel(y);
         //int yhit = (y - (-55.))/(PIXEL_SIZE + PIXEL_GAP);
 
 	if (xhit == -1337 || yhit == -1337)
@@ -87,25 +87,15 @@ void DircRectDigitizer::digitize_point(dirc_point &pt)
 	}
 
 }
-int DircRectDigitizer::find_pixel_row(double x)
+int DircRectDigitizer::find_pixel(double x)
 {
-	int pmt_row  = (24.904 - x)/PMT_SIZE_GAP;
-	double pixel_x = 24.904 - x - pmt_row*PMT_SIZE_GAP;
+	int pmt_row    =  x / PMT_SIZE_GAP;
+	double pixel_x = x - pmt_row*PMT_SIZE_GAP;
 	int pmt_pixel_row = (pixel_x + PIXEL_GAP)/(PIXEL_SIZE+PIXEL_GAP);
 	if (pixel_x > PMT_SIZE)
 		return -1337;
 	else
 		return pmt_row*8 + pmt_pixel_row;
-}
-int DircRectDigitizer::find_pixel_col(double y)
-{
-        int pmt_col  = y / PMT_SIZE_GAP;
-        double pixel_y = y - pmt_col*PMT_SIZE_GAP;
-        int pmt_pixel_col = (pixel_y + PIXEL_GAP)/(PIXEL_SIZE+PIXEL_GAP);
-        if (pixel_y > PMT_SIZE)
-                return -1337;
-        else
-                return pmt_col*8 + pmt_pixel_col;
 }
 
 

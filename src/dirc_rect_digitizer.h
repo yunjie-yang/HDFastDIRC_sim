@@ -27,8 +27,7 @@ private:
 	double PMT_SIZE     = PIXEL_SIZE * 8 + PIXEL_GAP * 7;
 	double PMT_SIZE_GAP = PMT_SIZE + PMT_GAP;
 
-	int find_pixel_row(double x);
-	int find_pixel_col(double y);
+	int find_pixel(double x);
 	
 public:
 	DircRectDigitizer(\

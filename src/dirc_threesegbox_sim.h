@@ -67,6 +67,9 @@ protected:
 	double pmtPlaneMinZ;
 	double pmtPlaneMaxZ;
 
+	double pmtPlane_xl;
+	double pmtPlane_xr;
+
 	double sensPlaneYdistConversion;
 	double sensPlaneZdistConversion;
 
@@ -157,7 +160,7 @@ protected:
 	void build_readout_box();
 	void fill_sens_plane_vecs();
 	void fill_threeseg_plane_vecs();
-	void fill_largePlanarMirror_plane_vecs();
+	void fill_other_mirrors_plane_vecs();
 	void fill_foc_mirror_vecs();
 	void sidemirror_reflect_points(std::vector<dirc_point> &points);
 	void spread_wedge_mirror();

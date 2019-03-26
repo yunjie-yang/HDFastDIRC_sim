@@ -78,17 +78,6 @@ int main(int nargs, char* argv[])
 	double bar_box_yoff = 0;
 	double bar_box_zoff = 0;
 
-
-	double pmt_min_z = -1000;
-	double pmt_max_z = 1000;
-	double large_mirror_min_z = -1000;
-	double large_mirror_max_z = 1000;
-
-	pmt_min_z = -559;
-	pmt_max_z = -329;
-	large_mirror_min_z = -559;
-	large_mirror_max_z = -130;
-
 	int rseed = 1337;
 
 	double tracking_unc = .0000*57.3; //mrad
@@ -111,12 +100,6 @@ int main(int nargs, char* argv[])
 
 	digit_miny = miny;
 	digit_maxy = maxy;
-
-	//Sets the side boundarys of the distributions
-	double sm_xl = -10000000;
-	double sm_xr = -sm_xl;
-	sm_xr = 40.85;
-	sm_xl = sm_xr - 983.32;
 
 
 	int n_sim_phots = 40;
@@ -152,6 +135,7 @@ int main(int nargs, char* argv[])
 	TH2F *pion_dist_xt = new TH2F("pion_dist_xt","xt val of intercepted points - pion",(maxx-minx)/(res_enhance*resx),minx,maxx,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *pion_dist_yt = new TH2F("pion_dist_yt","yt val of intercepted points - pion",(maxy-miny)/(res_enhance*resy),miny,maxy,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
+	//TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",190,-10.5,180.5,70,-9.5,60.5);
 
 	TH1F *kaon_dist_x = new TH1F("kaon_dist_x","x val of intercepted points - kaon",(maxx-minx)/(res_enhance*resx),minx,maxx);
 	TH1F *kaon_dist_y = new TH1F("kaon_dist_y","y val of intercepted points - kaon",(maxy-miny)/(res_enhance*resy),miny,maxy);
@@ -192,11 +176,13 @@ int main(int nargs, char* argv[])
 	if (user_opts.Find("SIM_ONLY", opt_int)) SIM_ONLY = opt_int[1];
 	if (user_opts.Find("OUTFILE", opt_str)) sprintf(rootfilename,"%s",opt_str[1].c_str());
 	if (user_opts.Find("E", opt_val)) energy = opt_val[1];
+	if (user_opts.Find("GEOMETRY_INFILE", opt_str)) sprintf(geometry_infilename,"%s",opt_str[1].c_str());
 	if (user_opts.Find("GEOMETRY_OUTFILE", opt_str)) sprintf(geometry_outfilename,"%s",opt_str[1].c_str());
 	if (user_opts.Find("PARTICLE_BAR", opt_val)) particle_bar = double(opt_val[1]);
 
 	printf("SIM_ONLY = %d \n",SIM_ONLY);
 	printf("OUTFILE = %s \n", rootfilename);
+	printf("GEOMETRY_INFILE = %s \n", geometry_infilename);
 	printf("energy = %8.02f \n",energy);
 	printf("particle_bar = %8.02f \n",particle_bar);
 
@@ -234,11 +220,8 @@ int main(int nargs, char* argv[])
 			pmt_angle_nominal,\
 			geometry_infilename);
 
-	dirc_model->set_sidemirror(sm_xr,sm_xl);
-	//dirc_model->set_pmt_plane_zs(pmt_min_z,pmt_max_z);
-	//dirc_model->set_large_mirror_zs(large_mirror_min_z,large_mirror_max_z);
-	//dirc_model->set_focmirror_nonuniformity(main_mirror_nonuniformity);
-	//dirc_model->set_wedge_mirror_rand(wedge_non_uniformity);
+	dirc_model->set_focmirror_nonuniformity(main_mirror_nonuniformity);
+	dirc_model->set_wedge_mirror_rand(wedge_non_uniformity);
 
 
 	//various running condition controls
@@ -282,8 +265,8 @@ int main(int nargs, char* argv[])
 						 bar_box_yoff,\
 						 bar_box_zoff);
 
-	//dirc_model->set_geometry_outfile(geometry_outfilename);
-	//dirc_model->print_model();
+	dirc_model->set_geometry_outfile(geometry_outfilename);
+	dirc_model->print_model();
 
 	printf("\n DIRC model all set. Begin running.\n");
 

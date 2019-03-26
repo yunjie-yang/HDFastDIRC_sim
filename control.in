@@ -1,5 +1,6 @@
 SIM_ONLY  1
 OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/bar_11/hist_bar_11.root'
+GEOMETRY_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/FastDIRC_HDDS_Nominal.csv'
 GEOMETRY_OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/bar_11/dirc_model_geometry_bar_11.csv'
 PARTICLE_BAR  11.0
 END 

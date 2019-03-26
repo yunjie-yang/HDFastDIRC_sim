@@ -30,7 +30,9 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 				rand_seed,\
 				ibar_length,\
 				ibar_width,\
-				ibar_depth) {
+				ibar_depth,\
+				iupper_wedge_top,\
+				igeometry_infile) {
 
 	sprintf(geometry_outfile,"/media/sf_SharedFolderVM/FastDIRC_geometry/dirc_model_geometry.csv");
 
@@ -60,12 +62,9 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	sidemirror_xr = 1000000;
 	sidemirror_reflectivity = .9;
 
-
-	//Take average
 	quartzIndex = 1.47;
 	liquidIndex = 1.47;
-	quartzLiquidY = upperWedgeBottom;
-
+	quartzLiquidY = wedgeHeight + windowThickness;
 	
 
 	//boxCloseZ = -614;
@@ -150,22 +149,6 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	focZoff_threeSeg3 = 0;
 
 
-	upperWedgeMirrorTop = focMirrorBottom;
-
-        GlueXUserOptions user_opts;
-        if (user_opts.ReadControl_in(geometry_infile) == 0)
-        {
-                std::cerr << "Reading geometry_infile failed" << std::endl;
-                exit(-1);
-        }
-
-        std::map<int, double> opt_val;
-        if (user_opts.Find("upperWedgeMirrorTop", opt_val))     upperWedgeMirrorTop = opt_val[1];
-
-
-
-
-
 	build_readout_box();
 }
 
@@ -208,7 +191,8 @@ void DircThreeSegBoxSim::print_model()
 	printf("  wedgeDepthHigh       (mm): %12.04f\n",wedgeDepthHigh);output_csv<<"wedgeDepthHigh \t "<<wedgeDepthHigh<<"\n";
 	printf("  lowerWedgeExtensionZ (mm): %12.04f\n",lowerWedgeExtensionZ);output_csv<<"lowerWedgeExtensionZ \t "<<lowerWedgeExtensionZ<<"\n";
 	printf("  windowThickness      (mm): %12.04f\n",windowThickness);output_csv<<"windowThickness \t "<<windowThickness<<"\n";
-	printf("  upperWedgeMirrorTop  (mm): %12.04f\n",focMirrorBottom);output_csv<<"upperWedgeMirrorTop \t "<<focMirrorBottom<<"\n";
+	printf("  upperWedgeMirrorTop  (mm): %12.04f\n",upperWedgeMirrorTop);output_csv<<"upperWedgeMirrorTop \t "<<upperWedgeMirrorTop<<"\n";
+	printf("  quartzLiquidY        (mm): %12.04f\n",quartzLiquidY);output_csv<<"quartzLiquidY \t "<<quartzLiquidY<<"\n";
 
 	printf("\n\n    Optical Box:\n\n");
 
@@ -257,6 +241,8 @@ void DircThreeSegBoxSim::print_model()
 	printf("  reflOff          (mm): %12.04f\n",reflOff);output_csv<<"reflOff \t "<<reflOff<<"\n";
 	printf("  minZ             (mm): %12.04f\n",pmtPlaneMinZ);output_csv<<"pmtPlaneMinZ \t "<<pmtPlaneMinZ<<"\n";
 	printf("  maxZ             (mm): %12.04f\n",pmtPlaneMaxZ);output_csv<<"pmtPlaneMaxZ \t "<<pmtPlaneMaxZ<<"\n";
+	printf("  xl               (mm): %12.04f\n",pmtPlane_xl);output_csv<<"pmtPlane_xl \t "<<pmtPlane_xl<<"\n";
+	printf("  xr               (mm): %12.04f\n",pmtPlane_xr);output_csv<<"pmtPlane_xr \t "<<pmtPlane_xr<<"\n";
 	printf("  boxCloseZ        (mm): %12.04f\n",boxCloseZ);output_csv<<"boxCloseZ \t "<<boxCloseZ<<"\n";
 	printf("  unReflSensPlaneY (mm): %12.04f\n",unReflSensPlaneY);output_csv<<"unReflSensPlaneY \t "<<unReflSensPlaneY<<"\n";
 	printf("  unReflSensPlaneZ (mm): %12.04f\n",unReflSensPlaneZ);output_csv<<"unReflSensPlaneZ \t "<<unReflSensPlaneZ<<"\n";
@@ -327,7 +313,7 @@ void DircThreeSegBoxSim::build_readout_box()
 	build_system();
 	fill_threeseg_plane_vecs();
 	fill_foc_mirror_vecs();
-	fill_largePlanarMirror_plane_vecs();
+	fill_other_mirrors_plane_vecs();
 	fill_sens_plane_vecs();
 	//still rebuild wedge and bars when this is called:
 }
@@ -360,8 +346,10 @@ void DircThreeSegBoxSim::fill_sens_plane_vecs() {
 
         if (user_opts.Find("unReflSensPlaneY", opt_sens))     unReflSensPlaneY = opt_sens[1];
         if (user_opts.Find("unReflSensPlaneZ", opt_sens))     unReflSensPlaneZ = opt_sens[1];
-        if (user_opts.Find("pmtPlaneMinZ",     opt_sens))     pmtPlaneMinZ = opt_sens[1];
-        if (user_opts.Find("pmtPlaneMaxZ",     opt_sens))     pmtPlaneMaxZ = opt_sens[1];
+        if (user_opts.Find("pmtPlaneMinZ",     opt_sens))     pmtPlaneMinZ     = opt_sens[1];
+        if (user_opts.Find("pmtPlaneMaxZ",     opt_sens))     pmtPlaneMaxZ     = opt_sens[1];
+        if (user_opts.Find("pmtPlane_xl",      opt_sens))     pmtPlane_xl      = opt_sens[1];
+        if (user_opts.Find("pmtPlane_xr",      opt_sens))     pmtPlane_xr      = opt_sens[1];
 
 	sensPlaneY = unReflSensPlaneY - 2 * (unReflSensPlaneY - largePlanarMirrorY);
 	sensPlaneZ = unReflSensPlaneZ;
@@ -389,7 +377,7 @@ void DircThreeSegBoxSim::fill_sens_plane_vecs() {
 	sensPlaneYdistConversion = 1/sin(sens_rot/57.3);
 	sensPlaneZdistConversion = 1/cos(sens_rot/57.3);
 }
-void DircThreeSegBoxSim::fill_largePlanarMirror_plane_vecs() {
+void DircThreeSegBoxSim::fill_other_mirrors_plane_vecs() {
 
         GlueXUserOptions user_opts;
         if (user_opts.ReadControl_in(geometry_infile) == 0)
@@ -403,15 +391,21 @@ void DircThreeSegBoxSim::fill_largePlanarMirror_plane_vecs() {
         if (user_opts.Find("largePlanarMirrorMinZ", opt_val))   largePlanarMirrorMinZ  = opt_val[1];
         if (user_opts.Find("largePlanarMirrorMaxZ", opt_val))   largePlanarMirrorMaxZ  = opt_val[1];
 
-        largePlanarMirrorNx = 0; 
-        largePlanarMirrorNy = 1;
-        largePlanarMirrorNz = 0;
+	// large planar mirrors
 /*
         largePlanarMirrorD = upperWedgeTop + barLength/2;
         largePlanarMirrorMinZ = -559;
         largePlanarMirrorMaxZ = -130;
 */
+        largePlanarMirrorNx = 0; 
+        largePlanarMirrorNy = 1;
+        largePlanarMirrorNz = 0;
 	largePlanarMirrorD = largePlanarMirrorY;
+
+	// side mirrors
+        if (user_opts.Find("sidemirror_xl", opt_val))   sidemirror_xl  = opt_val[1];
+        if (user_opts.Find("sidemirror_xr", opt_val))   sidemirror_xr  = opt_val[1];
+
 
 }
 void DircThreeSegBoxSim::set_sidemirror_reflectivity(double isr) {
@@ -473,24 +467,26 @@ void DircThreeSegBoxSim::fill_threeseg_plane_vecs() {
                 exit(-1);
         }
 
-        std::map<int, double> opt_threeSeg;
+        std::map<int, double> opt_val;
 
-        if (user_opts.Find("threeSeg_theta_1", opt_threeSeg))      threeSeg_theta_1 = opt_threeSeg[1]/rad2deg;
-        if (user_opts.Find("threeSeg_theta_2", opt_threeSeg))      threeSeg_theta_2 = opt_threeSeg[1]/rad2deg;
-        if (user_opts.Find("threeSeg_theta_3", opt_threeSeg))      threeSeg_theta_3 = opt_threeSeg[1]/rad2deg;
+        if (user_opts.Find("upperWedgeMirrorTop", opt_val))     upperWedgeMirrorTop = opt_val[1];
 
-        if (user_opts.Find("threeSeg1Z", opt_threeSeg))      threeSeg1Z     = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg1Y", opt_threeSeg))      threeSeg1Y     = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg1Z_end", opt_threeSeg))  threeSeg1Z_end = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg1Y_end", opt_threeSeg))  threeSeg1Y_end = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg2Z", opt_threeSeg))      threeSeg2Z     = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg2Y", opt_threeSeg))      threeSeg2Y     = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg2Z_end", opt_threeSeg))  threeSeg2Z_end = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg2Y_end", opt_threeSeg))  threeSeg2Y_end = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg3Z", opt_threeSeg))      threeSeg3Z     = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg3Y", opt_threeSeg))      threeSeg3Y     = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg3Z_end", opt_threeSeg))  threeSeg3Z_end = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg3Y_end", opt_threeSeg))  threeSeg3Y_end = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg_theta_1", opt_val))      threeSeg_theta_1 = opt_val[1]/rad2deg;
+        if (user_opts.Find("threeSeg_theta_2", opt_val))      threeSeg_theta_2 = opt_val[1]/rad2deg;
+        if (user_opts.Find("threeSeg_theta_3", opt_val))      threeSeg_theta_3 = opt_val[1]/rad2deg;
+
+        if (user_opts.Find("threeSeg1Z", opt_val))      threeSeg1Z     = opt_val[1];
+        if (user_opts.Find("threeSeg1Y", opt_val))      threeSeg1Y     = opt_val[1];
+        if (user_opts.Find("threeSeg1Z_end", opt_val))  threeSeg1Z_end = opt_val[1];
+        if (user_opts.Find("threeSeg1Y_end", opt_val))  threeSeg1Y_end = opt_val[1];
+        if (user_opts.Find("threeSeg2Z", opt_val))      threeSeg2Z     = opt_val[1];
+        if (user_opts.Find("threeSeg2Y", opt_val))      threeSeg2Y     = opt_val[1];
+        if (user_opts.Find("threeSeg2Z_end", opt_val))  threeSeg2Z_end = opt_val[1];
+        if (user_opts.Find("threeSeg2Y_end", opt_val))  threeSeg2Y_end = opt_val[1];
+        if (user_opts.Find("threeSeg3Z", opt_val))      threeSeg3Z     = opt_val[1];
+        if (user_opts.Find("threeSeg3Y", opt_val))      threeSeg3Y     = opt_val[1];
+        if (user_opts.Find("threeSeg3Z_end", opt_val))  threeSeg3Z_end = opt_val[1];
+        if (user_opts.Find("threeSeg3Y_end", opt_val))  threeSeg3Y_end = opt_val[1];
 
 	threeSeg1Y += focYoff_threeSeg1;
 	threeSeg1Z += focZoff_threeSeg1;
@@ -683,6 +679,9 @@ void DircThreeSegBoxSim::warp_readout_box(
 	
 	//Must reflect after offset....
 	sidemirror_reflect_point(out_val);
+	
+	out_val.x  = pmtPlane_xr - out_val.x;
+
 }
 bool DircThreeSegBoxSim::absorbtion_mc(double dx, double dy) {
 	//True if the particle makes it

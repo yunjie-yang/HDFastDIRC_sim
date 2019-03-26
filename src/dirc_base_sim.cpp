@@ -2,6 +2,9 @@
 
 #include "dirc_base_sim.h"
 #include "dirc_point.h"
+
+#include "GlueXUserOptions.h"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -17,8 +20,11 @@ DircBaseSim::DircBaseSim(
 		int rand_seed /*=4357*/,\
 		double ibarLength/*=4900*/, \
 		double ibarWidth/*=35*/, \
-		double ibarDepth/*=17.25*/,
-		double iupperWedgeTop/*=178.6*/) {
+		double ibarDepth/*=17.25*/,\
+		double iupperWedgeTop/*=178.6*/,\
+		const char* igeometry_infile) {
+
+	geometry_infile = (char*) igeometry_infile;
 
 	barLength=ibarLength;
 	barWidth=ibarWidth;
@@ -36,49 +42,16 @@ DircBaseSim::DircBaseSim(
 
 	upperWedgeAngleStore = false;
 
-	//wedgeDepthHigh = wedgeDepthOff+barDepth+wedgeHeight*sin(wedgeCloseAngle/57.296); //FastDIRC
-	wedgeDepthHigh = wedgeDepthOff+barDepth+wedgeHeight*tan(wedgeCloseAngle/57.296);
-
 	windowThickness = 9.6;
 
 	upperWedgeGap = 20;
 
 	upperWedgeTop = iupperWedgeTop;
-	upperWedgeBottom = wedgeHeight + windowThickness + upperWedgeGap;
-	upperWedgeHeight = upperWedgeTop - upperWedgeBottom + upperWedgeGap;
-	upperWedgeDepthHigh = wedgeDepthHigh + (upperWedgeTop-wedgeHeight)*sin(wedgeCloseAngle/57.296);
 
-
-	lowerWedgeExtensionZ = -wedgeDepthHigh - tan(wedgeCloseAngle/57.296)*(upperWedgeBottom - wedgeHeight);
-
-
-	//wedgeCloseAngle -= .5;
-
-	//Variables used for plane intersection
-	wedgeClosePlaneNx = 0; //Shouldn't be needed
-	wedgeClosePlaneNy = sin(wedgeCloseAngle/57.296);
-	wedgeClosePlaneNz = cos(wedgeCloseAngle/57.296);
-
-	upperWedgeClosePlaneNx = 0; //Shouldn't be needed
-	upperWedgeClosePlaneNy = sin(wedgeCloseAngle/57.296);
-	upperWedgeClosePlaneNz = cos(wedgeCloseAngle/57.296);
 
 	upperWedgeNonUniform = false;
 	upperWedgeNonUniformSpread = 0;
 
-	wedgeClosePlaneD = barLength/2*wedgeClosePlaneNy - wedgeClosePlaneNz * (barDepth+wedgeDepthOff);
-
-	//printf("Wedge Nxyz: %12.04f %12.04f %12.04f\n",wedgeClosePlaneNx,wedgeClosePlaneNy,wedgeClosePlaneNz);
-
-	//upperWedgeClosePlaneD = (barLength/2 + upperWedgeBottom)*upperWedgeClosePlaneNy + upperWedgeClosePlaneNz*lowerWedgeExtensionZ;
-	//printf("uwb: %12.04f lwez: %12.04f\n",upperWedgeBottom,lowerWedgeExtensionZ);
-	upperWedgeClosePlaneD = wedgeClosePlaneD; //should be in the same plane/;
-
-	upperWedgeFarPlaneNx = 0; //Shouldn't be needed
-	upperWedgeFarPlaneNy = 0;
-	upperWedgeFarPlaneNz = -1;
-
-	upperWedgeFarPlaneD = (barLength/2 + upperWedgeBottom)*upperWedgeFarPlaneNy;
 
 	//Take average
 	quartzIndex = 1.47;
@@ -144,9 +117,65 @@ DircBaseSim::DircBaseSim(
 	useMoliere = true;
 	moliereP = 1000000;//minimal scattering 
 
-
-
 	build_system();
+}
+void DircBaseSim::build_system() {
+
+        GlueXUserOptions user_opts;
+        if (user_opts.ReadControl_in(geometry_infile) == 0)
+        {
+                std::cerr << "Reading geometry_infile failed" << std::endl;
+                exit(-1);
+        }
+
+        std::map<int, double> opt_val;
+        if (user_opts.Find("upperWedgeTop", opt_val))     upperWedgeTop = opt_val[1];
+        if (user_opts.Find("upperWedgeGap", opt_val))     upperWedgeGap = opt_val[1];
+
+	quartzLiquidY  = wedgeHeight + windowThickness;
+
+	wedgeDepthHigh = wedgeDepthOff + barDepth + wedgeHeight * tan(wedgeCloseAngle/57.296);
+
+	upperWedgeBottom = wedgeHeight + windowThickness + upperWedgeGap;
+	upperWedgeHeight = upperWedgeTop - upperWedgeBottom + upperWedgeGap;
+
+	upperWedgeDepthHigh  =  wedgeDepthHigh + (upperWedgeTop - wedgeHeight ) * tan(wedgeCloseAngle/57.296);
+
+
+	lowerWedgeExtensionZ = -wedgeDepthHigh - (upperWedgeBottom - wedgeHeight) * tan(wedgeCloseAngle/57.296);
+
+
+	// Fill wedge plane vecs
+
+	// old quartz wedge
+	wedgeClosePlaneNx = 0; //Shouldn't be needed
+	wedgeClosePlaneNy = sin(wedgeCloseAngle/57.296);
+	wedgeClosePlaneNz = cos(wedgeCloseAngle/57.296);
+	wedgeClosePlaneD  = (barLength/2) * wedgeClosePlaneNy +  (-(barDepth+wedgeDepthOff)) * wedgeClosePlaneNz;
+
+        wedgeFarPlaneNx = 0; //Shouldn't be needed
+        wedgeFarPlaneNy = -sin(wedgeFarAngle/57.296);
+        wedgeFarPlaneNz = -cos(wedgeFarAngle/57.296);
+        wedgeFarPlaneD  = barLength/2*wedgeFarPlaneNy + 0. * wedgeFarPlaneNz;
+
+
+	// upper "wedge": actually wedge mirrors
+	upperWedgeClosePlaneNx = 0; //Shouldn't be needed
+	upperWedgeClosePlaneNy = sin(wedgeCloseAngle/57.296);
+	upperWedgeClosePlaneNz = cos(wedgeCloseAngle/57.296);
+	upperWedgeClosePlaneD  = (barLength/2 + upperWedgeBottom) * upperWedgeClosePlaneNy  
+					   + lowerWedgeExtensionZ * upperWedgeClosePlaneNz;
+	//upperWedgeClosePlaneD  = wedgeClosePlaneD; //should be in the same plane/;
+
+
+        upperWedgeFarZ       = 0; //Change based on geometry
+	upperWedgeFarPlaneNx = 0; //Shouldn't be needed
+	upperWedgeFarPlaneNy = 0;
+	upperWedgeFarPlaneNz = -1;
+	upperWedgeFarPlaneD  = (barLength/2 + upperWedgeBottom) * upperWedgeFarPlaneNy + upperWedgeFarZ * upperWedgeFarPlaneNz;
+
+
+	spread_wedge_mirror();
 }
 void DircBaseSim::set_store_bounces(bool isb)
 {
@@ -222,9 +251,6 @@ void DircBaseSim::spread_wedge_mirror() {
 		upperWedgeClosePlaneNz = cos(spread_ang/57.296);
 		upperWedgeClosePlaneD = (barLength/2 + upperWedgeBottom)*upperWedgeClosePlaneNy + upperWedgeClosePlaneNz*lowerWedgeExtensionZ;
 	}
-}
-void DircBaseSim::build_system() {
-	spread_wedge_mirror();
 }
 double DircBaseSim::get_quartz_n(double lambda) {
 	double B1,B2,B3,C1,C2,C3;

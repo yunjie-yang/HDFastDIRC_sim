@@ -271,6 +271,10 @@ protected:
 		double &dx,\
 		double &dy,\
 		double &dz) {}
+
+	//additions to original FastDIRC
+	char* geometry_infile   = new char[256];
+
 public:
 	//Also inherit and change this - allows for custom quantum efficiency.
 	//See source/dirc_threeseg_box_sim.cpp for sample implementation
@@ -310,7 +314,8 @@ public:
 		double ibarLength = 4900,\
 		double ibarWidth = 35,\
 		double ibarDepth = 17,\
-		double iupperWedgeTop = 178.6);
+		double iupperWedgeTop = 178.6,\
+		const char* igeometry_file = "");
 	std::vector<std::pair<double,double> > get_refraction_rand_phi(\
 		std::vector<double> &before_interface,\
 		std::vector<double> &after_interface,\
