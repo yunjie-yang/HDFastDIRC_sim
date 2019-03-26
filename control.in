@@ -1,10 +1,5 @@
-SIM_ONLY 1
-cGEOMETRY_INFILE '/media/sf_SharedFolderVM/FastDIRC_geometry/OutOfBox.csv'
-
-
-GEOMETRY_INFILE '/media/sf_SharedFolderVM/FastDIRC_geometry/FastDIRC_HDDS_Nominal.csv'
-
-OUTFILE '/media/sf_SharedFolderVM/FastDIRC_geometry/output_root/out_sens.root'
-GEOMETRY_OUTFILE '/media/sf_SharedFolderVM/FastDIRC_geometry/geometry_csv/dirc_model_geometry_sens.csv'
-
-END
+SIM_ONLY  1
+OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/bar_11/hist_bar_11.root'
+GEOMETRY_OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/bar_11/dirc_model_geometry_bar_11.csv'
+PARTICLE_BAR  11.0
+END 

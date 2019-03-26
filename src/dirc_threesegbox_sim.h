@@ -41,7 +41,6 @@ protected:
 	double threeSeg_theta_2;
 	double threeSeg_theta_3;
 	double seg_h;
-
 	
 	double focYoff;
 	double focZoff;

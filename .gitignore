@@ -4,7 +4,7 @@ hdfastdirc_sim
 hdfastdirc
 *.root
 root_outputs/*
-*.py
-*.C
+./*.py
+./*.C
 *.pdf
 *.gif

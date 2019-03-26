@@ -501,6 +501,13 @@ void DircThreeSegBoxSim::fill_threeseg_plane_vecs() {
 	threeSeg3Y += focYoff_threeSeg3;
 	threeSeg3Z += focZoff_threeSeg3;
 
+
+	threeSeg1Y_end = threeSeg2Y;
+	threeSeg1Z_end = threeSeg2Z;
+
+	threeSeg2Y_end = threeSeg3Y;
+	threeSeg2Z_end = threeSeg3Z;
+
 	threeSeg1Nx = 0;
 	threeSeg1Ny = sin(threeSeg_theta_1);
 	threeSeg1Nz = cos(threeSeg_theta_1);
