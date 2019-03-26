@@ -36,7 +36,7 @@ int main(int nargs, char* argv[])
 	const char* config_str;
 
 
-	double energy = 4.5;
+	double energy = 5.;
 	double kmass = .4937;
 	double pimass = .1396;
 
@@ -183,19 +183,20 @@ int main(int nargs, char* argv[])
 		exit(-1);
 	}
 
-	std::map<int, int> opt_SIM_ONLY;
-	if (user_opts.Find("SIM_ONLY", opt_SIM_ONLY)) SIM_ONLY = opt_SIM_ONLY[1];
-	printf("SIM_ONLY = %d \n",SIM_ONLY);
-
+	std::map<int, int> opt_int;
 	std::map<int, std::string> opt_str;
+	std::map<int, double> opt_val;
+
+	if (user_opts.Find("SIM_ONLY", opt_int)) SIM_ONLY = opt_int[1];
 	if (user_opts.Find("OUTFILE", opt_str)) sprintf(rootfilename,"%s",opt_str[1].c_str());
-	printf("OUTFILE = %s \n", rootfilename);
-
-	std::map<int, double> opt_energy;
-	if (user_opts.Find("E", opt_energy)) energy = opt_energy[1];
-	printf("energy = %8.02f \n",energy);
-
+	if (user_opts.Find("E", opt_val)) energy = opt_val[1];
 	if (user_opts.Find("GEOMETRY_OUTFILE", opt_str)) sprintf(geometry_outfilename,"%s",opt_str[1].c_str());
+	if (user_opts.Find("PARTICLE_BAR", opt_val)) particle_bar = double(opt_val[1]);
+
+	printf("SIM_ONLY = %d \n",SIM_ONLY);
+	printf("OUTFILE = %s \n", rootfilename);
+	printf("energy = %8.02f \n",energy);
+	printf("particle_bar = %8.02f \n",particle_bar);
 
 	/**************************************************************************/
 	/***********              APPLY CONFIG                 ********************/
@@ -278,8 +279,8 @@ int main(int nargs, char* argv[])
 						 bar_box_yoff,\
 						 bar_box_zoff);
 
-	dirc_model->set_geometry_outfile(geometry_outfilename);
-	dirc_model->print_model();
+	//dirc_model->set_geometry_outfile(geometry_outfilename);
+	//dirc_model->print_model();
 
 	printf("\n DIRC model all set. Begin running.\n");
 
