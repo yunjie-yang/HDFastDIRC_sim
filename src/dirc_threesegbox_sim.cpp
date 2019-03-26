@@ -475,9 +475,9 @@ void DircThreeSegBoxSim::fill_threeseg_plane_vecs() {
 
         std::map<int, double> opt_threeSeg;
 
-        if (user_opts.Find("threeSeg_theta_1", opt_threeSeg))      threeSeg_theta_1 = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg_theta_2", opt_threeSeg))      threeSeg_theta_2 = opt_threeSeg[1];
-        if (user_opts.Find("threeSeg_theta_3", opt_threeSeg))      threeSeg_theta_3 = opt_threeSeg[1];
+        if (user_opts.Find("threeSeg_theta_1", opt_threeSeg))      threeSeg_theta_1 = opt_threeSeg[1]/rad2deg;
+        if (user_opts.Find("threeSeg_theta_2", opt_threeSeg))      threeSeg_theta_2 = opt_threeSeg[1]/rad2deg;
+        if (user_opts.Find("threeSeg_theta_3", opt_threeSeg))      threeSeg_theta_3 = opt_threeSeg[1]/rad2deg;
 
         if (user_opts.Find("threeSeg1Z", opt_threeSeg))      threeSeg1Z     = opt_threeSeg[1];
         if (user_opts.Find("threeSeg1Y", opt_threeSeg))      threeSeg1Y     = opt_threeSeg[1];
