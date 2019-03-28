@@ -105,6 +105,7 @@ int main(int nargs, char* argv[])
 	int n_sim_phots = 40;
 
 	int n_phi_phots = 150000;
+	//int n_phi_phots = 150;
 	int n_z_phots = 4;
 
 	bool use_quartz_for_liquid = false;
@@ -136,6 +137,7 @@ int main(int nargs, char* argv[])
 	TH2F *pion_dist_yt = new TH2F("pion_dist_yt","yt val of intercepted points - pion",(maxy-miny)/(res_enhance*resy),miny,maxy,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
 	//TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",190,-10.5,180.5,70,-9.5,60.5);
+	TH3F *pion_dist_3D = new TH3F("pion_dist_3D","(x,y,t) - pion; Pixel Row ; Pixel Column ; Hit Time (ns)",144,-0.5,143.5,48,-0.5,47.5,300,0,300);
 
 	TH1F *kaon_dist_x = new TH1F("kaon_dist_x","x val of intercepted points - kaon",(maxx-minx)/(res_enhance*resx),minx,maxx);
 	TH1F *kaon_dist_y = new TH1F("kaon_dist_y","y val of intercepted points - kaon",(maxy-miny)/(res_enhance*resy),miny,maxy);
@@ -175,16 +177,23 @@ int main(int nargs, char* argv[])
 
 	if (user_opts.Find("SIM_ONLY", opt_int)) SIM_ONLY = opt_int[1];
 	if (user_opts.Find("OUTFILE", opt_str)) sprintf(rootfilename,"%s",opt_str[1].c_str());
-	if (user_opts.Find("E", opt_val)) energy = opt_val[1];
 	if (user_opts.Find("GEOMETRY_INFILE", opt_str)) sprintf(geometry_infilename,"%s",opt_str[1].c_str());
 	if (user_opts.Find("GEOMETRY_OUTFILE", opt_str)) sprintf(geometry_outfilename,"%s",opt_str[1].c_str());
 	if (user_opts.Find("PARTICLE_BAR", opt_val)) particle_bar = double(opt_val[1]);
+	if (user_opts.Find("E", opt_val)) energy = opt_val[1];
+	if (user_opts.Find("PARTICLE_THETA", opt_val)) particle_theta = opt_val[1];
+	if (user_opts.Find("PARTICLE_PHI", opt_val)) particle_phi = opt_val[1];
+	if (user_opts.Find("PARTICLE_Y", opt_val)) particle_y = opt_val[1];
 
-	printf("SIM_ONLY = %d \n",SIM_ONLY);
-	printf("OUTFILE = %s \n", rootfilename);
+	printf("SIM_ONLY        = %d \n",SIM_ONLY);
+	printf("OUTFILE         = %s \n", rootfilename);
 	printf("GEOMETRY_INFILE = %s \n", geometry_infilename);
-	printf("energy = %8.02f \n",energy);
-	printf("particle_bar = %8.02f \n",particle_bar);
+	printf("particle_bar    = %8.02f \n",particle_bar);
+	printf("energy          = %8.02f \n",energy);
+	printf("theta           = %8.02f \n",particle_theta);
+	printf("phi             = %8.02f \n",particle_phi);
+	printf("particle_x      = %8.02f \n",particle_x);
+	printf("particle_y      = %8.02f \n",particle_y);
 
 	/**************************************************************************/
 	/***********              APPLY CONFIG                 ********************/
@@ -448,6 +457,7 @@ int main(int nargs, char* argv[])
 		pion_dist_t->Fill(t_ns);
 
 		pion_dist_rowcol->Fill(hit_points_pion[i].pixel_row,hit_points_pion[i].pixel_col);
+		pion_dist_3D->Fill(hit_points_pion[i].pixel_row,hit_points_pion[i].pixel_col,t_ns);
 	}
 
 	for (unsigned int i = 0; i < hit_points_kaon.size(); i++)
@@ -479,6 +489,7 @@ int main(int nargs, char* argv[])
 	pion_dist_yt->Write();
 	pion_dist_t->Write();
 	pion_dist_rowcol->Write();
+	pion_dist_3D->Write();
 
 	kaon_dist_x->Write();
 	kaon_dist_y->Write();

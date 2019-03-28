@@ -406,6 +406,8 @@ void DircThreeSegBoxSim::fill_other_mirrors_plane_vecs() {
         if (user_opts.Find("sidemirror_xl", opt_val))   sidemirror_xl  = opt_val[1];
         if (user_opts.Find("sidemirror_xr", opt_val))   sidemirror_xr  = opt_val[1];
 
+	// others
+        if (user_opts.Find("distDCBR11DCBR12", opt_val))   distDCBR11DCBR12  = opt_val[1];
 
 }
 void DircThreeSegBoxSim::set_sidemirror_reflectivity(double isr) {

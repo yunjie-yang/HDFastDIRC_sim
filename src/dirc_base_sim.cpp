@@ -29,6 +29,8 @@ DircBaseSim::DircBaseSim(
 	barLength=ibarLength;
 	barWidth=ibarWidth;
 	barDepth=ibarDepth;
+	
+	distDCBR11DCBR12 = 0.15 + barWidth;
 
 	wedgeWidthOff = 1.75;
 	wedgeDepthOff = 10;
@@ -129,8 +131,9 @@ void DircBaseSim::build_system() {
         }
 
         std::map<int, double> opt_val;
-        if (user_opts.Find("upperWedgeTop", opt_val))     upperWedgeTop = opt_val[1];
-        if (user_opts.Find("upperWedgeGap", opt_val))     upperWedgeGap = opt_val[1];
+        if (user_opts.Find("distDCBR11DCBR12", opt_val))     distDCBR11DCBR12 = opt_val[1];
+        if (user_opts.Find("upperWedgeTop", opt_val))        upperWedgeTop    = opt_val[1];
+        if (user_opts.Find("upperWedgeGap", opt_val))        upperWedgeGap    = opt_val[1];
 
 	quartzLiquidY  = wedgeHeight + windowThickness;
 
@@ -176,6 +179,7 @@ void DircBaseSim::build_system() {
 
 
 	spread_wedge_mirror();
+
 }
 void DircBaseSim::set_store_bounces(bool isb)
 {
@@ -329,7 +333,14 @@ double DircBaseSim::get_beta(double E, double m) {
 double DircBaseSim::get_bar_offset(int bar)
 {
 	//return fabs(bar)/bar*((150-0.5*(barWidth))+bar*(barWidth+.015));
-	return -bar*(barWidth+.15);
+	if (bar<0)
+		return 0.;
+	else if (bar<12)
+		return -(bar*(barWidth+.15));
+	else if (bar<24)
+		return -((bar-1)*(barWidth+.15)+distDCBR11DCBR12);
+	else
+		return 0.;
 }
 int DircBaseSim::get_bar_from_x(double x)
 {
@@ -1058,7 +1069,6 @@ void DircBaseSim::fill_reg_phi(\
 		{
 			sourceOff = -sDepth/2;
 		}
-
 		for (int j = 0; j < adj_n_photons_phi; j++) {
 			regPhi = j*2*3.14159265357/(adj_n_photons_phi);
 			if (beta < 0) {
@@ -1066,16 +1076,6 @@ void DircBaseSim::fill_reg_phi(\
 				temit = emitAngle + rand_add;
 			} else {
 				temit = get_cerenkov_angle_rand(beta,ckov_theta_unc,wavelength);
-				//if (j<10)
-				if (false)
-				{
-					std::cout<<std::endl;
-					std::cout<<"beta           = "<<beta<<std::endl;
-					std::cout<<"ckov_theta_unc = "<<ckov_theta_unc<<std::endl;
-					std::cout<<"wavelength     = "<<wavelength<<std::endl;
-					std::cout<<"temit          = "<<temit<<std::endl;
-				}
-
 				quartzIndex = get_quartz_n(wavelength);//Painful way of doing this - saving and correcting is inelegant
 				liquidIndex = get_liquid_n(wavelength);//Painful way of doing this - saving and correcting is inelegant
 			}
@@ -1122,11 +1122,14 @@ void DircBaseSim::fill_reg_phi(\
 			rotate_2d(dz,dy,cos_ptheta,sin_ptheta);
 			rotate_2d(dy,dx,cos_pphi,sin_pphi);
 
-			//	printf("%12.04f %12.04f %12.04f %12.04f\n",temit,dx,dy,dz);
+			//printf("%12.04f %12.04f %12.04f %12.04f\n",temit,dx,dy,dz);
 
 			z -= barDepth;
 			x += particle_x;
 			y += particle_y;
+	
+			//if (j<5)
+			//	printf(" %12.04f %12.04f %12.04f \n",x,y,z);
 
 			//photon is now defined as up or down
 			if (dy > 0)

@@ -107,6 +107,8 @@ protected:
 	double upperWedgeMirrorTop;
 	double largePlanarMirrorY;
 
+	double distDCBR10DCBR11;
+
 	// I/O
 	char* geometry_outfile  = new char[256];
 	char* geometry_infile   = new char[256];

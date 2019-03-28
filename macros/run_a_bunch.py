@@ -14,10 +14,23 @@ def main():
     output_dir_top = "/media/sf_SharedFolderVM/FastDIRC_geometry/outputs"
     exec_dir = "/home/yunjiey/Documents/HDFastDIRC_sim"
 
-    for bar_i in range(12):
+    bar_theta_phi = [[1,4,32],[3,2,45],[3,3,165],[5,1,-75],[6,7,-110],[13,5,141]]
+    #bar_theta_phi = [[13,5,141]]
+    #bar_theta_phi = [[1,4,32]]
+    #bar_theta_phi = [[3,2,45]]
+
+    #for bar_i in range(12):
+    for item in bar_theta_phi:
+	bar_i = item[0]
+	theta_i = item[1]
+	phi_i = item[2]
+
         print "Processing Bar #%d" % (bar_i)
         # check/create output dir
-        output_dir_bar = "%s/bar_%d"%(output_dir_top,bar_i)
+
+        #output_dir_bar = "%s/bar_%d"%(output_dir_top,bar_i)
+        output_dir_bar = "%s/bar_%d_%d_%d"%(output_dir_top,bar_i,theta_i,phi_i)
+
         if not os.path.exists(output_dir_bar):
             os.mkdir(output_dir_bar)
         # write control.in and copy over 
@@ -30,10 +43,17 @@ def main():
 	##############################################################
 
         lines.append("SIM_ONLY  1\n")
-        lines.append("OUTFILE  '%s/hist_bar_%d.root'\n"%(output_dir_bar,bar_i))
+        lines.append("OUTFILE  '%s/hist_bar_%d_%d_%d.root'\n"%(output_dir_bar,bar_i,theta_i,phi_i))
         lines.append("GEOMETRY_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/FastDIRC_HDDS_Nominal.csv'\n")
         lines.append("GEOMETRY_OUTFILE  '%s/dirc_model_geometry_bar_%d.csv'\n"%(output_dir_bar,bar_i))
         lines.append("PARTICLE_BAR  %.01f\n"%bar_i)
+        lines.append("PARTICLE_THETA  %.01f\n"%theta_i)
+	if bar_i < 24:
+            lines.append("PARTICLE_PHI  %.01f\n"%(phi_i+180.))
+	else:
+            lines.append("PARTICLE_PHI  %.01f\n"%(phi_i))
+        lines.append("PARTICLE_PHI  %.01f\n"%(phi_i))
+        lines.append("PARTICLE_Y  -612.5\n")
 	lines.append("END \n")
 
 	##############################################################

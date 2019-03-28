@@ -6,5 +6,6 @@ hdfastdirc
 root_outputs/*
 ./*.py
 ./*.C
+./*.csv
 *.pdf
 *.gif

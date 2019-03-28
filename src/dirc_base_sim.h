@@ -29,6 +29,8 @@ protected:
 	double barDepth;
 	double windowThickness;
 
+	double distDCBR11DCBR12;
+
 	double wedgeTop;
 	double wedgeWidthOff;
 	double wedgeDepthOff;
