@@ -256,6 +256,80 @@ void DircThreeSegBoxSim::print_model()
 	output_csv.close();
 }
 
+void DircThreeSegBoxSim::convert_particle_kinematics(double &particle_x,\
+                                                double &particle_y,\
+                                                double &particle_theta,\
+                                                double &particle_phi,\
+                                                double &particle_bar,\
+                                                double particle_x_hall,\
+                                                double particle_y_hall,\
+                                                double particle_theta_hall,\
+                                                double particle_phi_hall)
+{
+
+        GlueXUserOptions user_opts;
+        if (user_opts.ReadControl_in(geometry_infile) == 0)
+        {
+                std::cerr << "Reading geometry_infile failed" << std::endl;
+                exit(-1);
+        }
+
+        std::map<int, double> opt_val;
+
+        double B00A_x(0.),B00A_y(0.),B11A_y(0.),B12A_y(0.),B23A_y(0.);
+
+        if (user_opts.Find("B00A_x", opt_val))   B00A_x   = opt_val[1]*10.;
+        if (user_opts.Find("B00A_y", opt_val))   B00A_y   = opt_val[1]*10.;
+        if (user_opts.Find("B11A_y", opt_val))   B11A_y   = opt_val[1]*10.;
+        if (user_opts.Find("B12A_y", opt_val))   B12A_y   = opt_val[1]*10.;
+        if (user_opts.Find("B23A_y", opt_val))   B23A_y   = opt_val[1]*10.;
+
+        // particle_theta
+        particle_theta = particle_theta_hall;
+
+        // particle_phi
+        if (particle_y_hall < 0.)
+                particle_phi = particle_phi_hall + 180.;
+        else
+                particle_phi = particle_phi_hall;
+
+        // particle_y
+        particle_y = barLength/2. - (particle_x_hall*10. - B00A_x);
+        if (particle_y < -barLength/2.)
+                printf("This shouldn't happen -- track not hitting any bar.\n");
+
+        // particle_bar, particle_x
+        double dist_y = 0.;
+        double remainder_y = 0.;
+        if (particle_y_hall < 0. && particle_y_hall > (B11A_y - barWidth/2.)/10.)
+	{
+		printf("here \n");
+                dist_y = B00A_y + barWidth/2. - particle_y_hall*10.;
+	}
+        else if (particle_y_hall < (B12A_y + barWidth/2.)/10. && particle_y_hall > (B23A_y-barWidth/2.)/10.)
+	{
+		printf("here2 \n");
+                dist_y = B00A_y + barWidth/2. - particle_y_hall*10. - distDCBR11DCBR12 + barWidth + 0.15;
+	}
+        else
+                printf("bar position for the upper bars not implemented yet. \n");
+  	remainder_y = fmod(dist_y,barWidth+0.15);
+     	particle_bar = double(int((dist_y-remainder_y)/(barWidth+0.15)));
+	printf("dist1112 = %12.04f\n",distDCBR11DCBR12);
+	printf("dist_y = %12.04f\n",dist_y);
+	printf("particle_bar = %12.04f\n",particle_bar);
+	printf("remainder_y  = %12.04f\n",remainder_y);
+        if (remainder_y < barWidth/2.)
+                particle_x = barWidth/2. - remainder_y;
+        else if (remainder_y < barWidth)
+                particle_x = remainder_y - barWidth/2.;
+        else
+                printf("particle hitting in between bars \n");
+
+
+}
+
+
 double DircThreeSegBoxSim::get_cerenkov_angle_rand(double beta, double additional_spread, double &wavelength) {
         //May be slow enough to consider approximating in distribution generation
         double out_ang = 0;

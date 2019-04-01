@@ -163,14 +163,6 @@ void compare_plot()
 	}
 */
 
-	vector<vector<int>> bar_theta_phi =    {
-						{1,4,32},
-						{3,2,45},
-						{3,3,165},
-						{5,1,-75},
-						{6,7,-110},
-						{13,5,141}
-					       };
 /*
 	vector<vector<int>> bar_theta_phi =    {
 						{1,4,32},
@@ -180,7 +172,6 @@ void compare_plot()
 						{6,7,-110},
 						{13,5,141}
 					       };
-*/
 
 	for (size_t i = 0 ; i < bar_theta_phi.size(); i++)
 	{
@@ -193,5 +184,29 @@ void compare_plot()
 		draw_compare_timing(file_fastdirc,file_geant,Form("/media/sf_SharedFolderVM/FastDIRC_geometry/plots/compare/timing"),Form("%s",label));
 
 	}
+*/
+
+	vector<vector<double>> bar_theta_phi_x_y =    {
+						{14,4,40,-250,-68.8493},
+						{2,2.5,68.4,120.8,-32.9},
+						{4,1.2,113.5,180.2,-25.1}
+					       };
+
+	for (size_t i = 0 ; i < bar_theta_phi_x_y.size(); i++)
+	{
+		char* label = Form("bar_%d_%d_%d_%d_%d",int(round(bar_theta_phi_x_y[i][0])),\
+							int(round(bar_theta_phi_x_y[i][1])),\
+							int(round(bar_theta_phi_x_y[i][2])),\
+							int(round(bar_theta_phi_x_y[i][3])),\
+							int(round(bar_theta_phi_x_y[i][4])));
+		
+		TFile* file_fastdirc = new TFile(Form("/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/%s/hist.root",label));
+		TFile* file_geant    = new TFile(Form("/media/sf_SharedFolderVM/FastDIRC_geometry/hdgeant4_outputs/%s/hd_root.root",label));
+
+		draw_compare_hit_patterns(file_fastdirc,file_geant,Form("/media/sf_SharedFolderVM/FastDIRC_geometry/plots/compare/full_kinematics"),Form("%s",label));
+		draw_compare_timing(file_fastdirc,file_geant,Form("/media/sf_SharedFolderVM/FastDIRC_geometry/plots/compare/timing"),Form("%s",label));
+
+	}
+
 
 }

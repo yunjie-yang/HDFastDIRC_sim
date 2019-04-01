@@ -181,6 +181,73 @@ void DircBaseSim::build_system() {
 	spread_wedge_mirror();
 
 }
+/*
+void DircBaseSim::convert_particle_kinematics(double &particle_x,\
+						double &particle_y,\
+						double &particle_theta,\
+						double &particle_phi,\
+	     					double &particle_bar,\
+						double particle_x_hall,\
+		     				double particle_y_hall,\
+		     				double particle_theta_hall,\
+		   				double particle_phi_hall){
+
+        GlueXUserOptions user_opts;
+        if (user_opts.ReadControl_in(geometry_infile) == 0)
+        {
+                std::cerr << "Reading geometry_infile failed" << std::endl;
+                exit(-1);
+        }
+
+        std::map<int, double> opt_val;
+	
+	double B00A_x(0.),B00D_x(0),B00A_y(0.),B12A_y(0.);
+
+        if (user_opts.Find("B00A_x", opt_val))   B00A_x   = opt_val[1];
+        if (user_opts.Find("B00D_x", opt_val))   B00D_x   = opt_val[1];
+        if (user_opts.Find("B00A_y", opt_val))   B00A_y   = opt_val[1];
+        if (user_opts.Find("B12A_y", opt_val))   B12A_y   = opt_val[1];
+
+	// particle_theta
+	particle_theta = particle_theta_hall;
+
+	// particle_phi
+	if (particle_y_hall < 0.)
+		particle_phi = particle_phi_hall + 180.;
+	else
+		particle_phi = particle_phi_hall;
+
+	// particle_y
+	particle_y = barLength/2. - (particle_x_hall - B00A_x) * 10.;
+	if (particle_y < -barLength/2.) 
+		printf("This shouldn't happen -- track not hitting any bar.\n");
+	
+	// particle_bar, particle_x
+	double dist_y = 0.;
+	double remainder_y = 0.;
+	if (particle_y_hall < (B00A_y + barWidth/2.))
+		dist_y = B00A_y + barWidth/2. - particle_y_hall;
+
+	else if (particle_y_hall < (B12A_y + barWidth/2.))
+		dist_y = B00A_y + barWidth/2. - particle_y_hall - distDCBR11DCBR12/10. + barWidth + 0.15;
+
+	else
+		printf("bar position for the upper bars not implemented yet. \n");
+
+	particle_bar = dist_y/(barWidth+.15);
+	remainder_y = dist_y%(barWidth+0.15);
+	if (remainder_y < barWidth/2.)
+		particle_x = barWidth/2. - remainder_y;
+	else if (remainder < barWidth)
+		particle_x = remainder_y - barWidth/2.;
+	else 
+		printf("particle hitting in between bars \n");
+
+
+}	
+*/
+
+
 void DircBaseSim::set_store_bounces(bool isb)
 {
 	store_bounces = isb;

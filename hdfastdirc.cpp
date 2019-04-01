@@ -48,6 +48,12 @@ int main(int nargs, char* argv[])
 	double particle_phi = 0;
 	double particle_bar = 2;
 
+	double particle_x_hall     = 0;
+	double particle_y_hall     = 0;
+	double particle_theta_hall = 0;
+	double particle_phi_hall   = 0;
+
+
 	double particle_flight_distance = 0;
 
 	bool kaleidoscope_plot = false;
@@ -181,19 +187,11 @@ int main(int nargs, char* argv[])
 	if (user_opts.Find("GEOMETRY_OUTFILE", opt_str)) sprintf(geometry_outfilename,"%s",opt_str[1].c_str());
 	if (user_opts.Find("PARTICLE_BAR", opt_val)) particle_bar = double(opt_val[1]);
 	if (user_opts.Find("E", opt_val)) energy = opt_val[1];
-	if (user_opts.Find("PARTICLE_THETA", opt_val)) particle_theta = opt_val[1];
-	if (user_opts.Find("PARTICLE_PHI", opt_val)) particle_phi = opt_val[1];
-	if (user_opts.Find("PARTICLE_Y", opt_val)) particle_y = opt_val[1];
+	if (user_opts.Find("PARTICLE_THETA", opt_val)) particle_theta_hall = opt_val[1];
+	if (user_opts.Find("PARTICLE_PHI", opt_val)) particle_phi_hall = opt_val[1];
+	if (user_opts.Find("PARTICLE_X", opt_val)) particle_x_hall = opt_val[1];
+	if (user_opts.Find("PARTICLE_Y", opt_val)) particle_y_hall = opt_val[1];
 
-	printf("SIM_ONLY        = %d \n",SIM_ONLY);
-	printf("OUTFILE         = %s \n", rootfilename);
-	printf("GEOMETRY_INFILE = %s \n", geometry_infilename);
-	printf("particle_bar    = %8.02f \n",particle_bar);
-	printf("energy          = %8.02f \n",energy);
-	printf("theta           = %8.02f \n",particle_theta);
-	printf("phi             = %8.02f \n",particle_phi);
-	printf("particle_x      = %8.02f \n",particle_x);
-	printf("particle_y      = %8.02f \n",particle_y);
 
 	/**************************************************************************/
 	/***********              APPLY CONFIG                 ********************/
@@ -228,6 +226,24 @@ int main(int nargs, char* argv[])
 			600,\
 			pmt_angle_nominal,\
 			geometry_infilename);
+
+	dirc_model->convert_particle_kinematics(particle_x,particle_y,particle_theta,particle_phi,particle_bar,\
+						particle_x_hall,particle_y_hall,particle_theta_hall,particle_phi_hall);
+	
+
+	printf("SIM_ONLY         = %d \n",SIM_ONLY);
+	printf("OUTFILE          = %s \n", rootfilename);
+	printf("GEOMETRY_INFILE  = %s \n", geometry_infilename);
+	printf("particle_bar     = %8.02f \n",particle_bar);
+	printf("energy           = %8.02f \n",energy);
+	printf("theta_hall       = %8.02f \n",particle_theta_hall);
+	printf("phi_hall         = %8.02f \n",particle_phi_hall);
+	printf("particle_x_hall  = %8.02f \n",particle_x_hall);
+	printf("particle_y_hall  = %8.02f \n",particle_y_hall);
+	printf("theta            = %8.02f \n",particle_theta);
+	printf("phi              = %8.02f \n",particle_phi);
+	printf("particle_x       = %8.02f \n",particle_x);
+	printf("particle_y       = %8.02f \n",particle_y);
 
 	dirc_model->set_focmirror_nonuniformity(main_mirror_nonuniformity);
 	dirc_model->set_wedge_mirror_rand(wedge_non_uniformity);
@@ -275,7 +291,7 @@ int main(int nargs, char* argv[])
 						 bar_box_zoff);
 
 	dirc_model->set_geometry_outfile(geometry_outfilename);
-	dirc_model->print_model();
+	//dirc_model->print_model();
 
 	printf("\n DIRC model all set. Begin running.\n");
 

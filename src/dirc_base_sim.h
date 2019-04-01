@@ -308,6 +308,19 @@ public:
 
 	void set_moliere_p(double ip);
 	void set_use_moliere(bool ium);
+
+/*
+	void conver_particle_kinematics(double &particle_x,\
+					double &particle_y,\
+					double &particle_theta,\
+					double &particle_phi,\
+					double &particle_bar,\
+					double particle_x_hall,\
+					double particle_y_hall,\
+					double particle_theta_hall,\
+					double particle_phi_hall);
+*/
+
 	//Random seed chosen arbitrarily
 	//default parameters correspond to babar dirc bars
 	//default upper wedge top is for gluex implementation.  Set to 0 to remove upper wedge

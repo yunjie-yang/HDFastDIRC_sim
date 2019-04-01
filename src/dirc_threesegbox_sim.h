@@ -229,6 +229,17 @@ public:
 	void set_large_mirror_zs(double imin, double imax);
 	void set_mirror_plane_offsets(double off_y, double off_z);
 
+        void convert_particle_kinematics(double &particle_x,\
+                                        double &particle_y,\
+                                        double &particle_theta,\
+                                        double &particle_phi,\
+                                        double &particle_bar,\
+                                        double particle_x_hall,\
+                                        double particle_y_hall,\
+                                        double particle_theta_hall,\
+                                        double particle_phi_hall);
+
+
 	
 	void set_store_optical_angles(bool ibool);
 	std::vector<double> get_focus_photon_angles();
