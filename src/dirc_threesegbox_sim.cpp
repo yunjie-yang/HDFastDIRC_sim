@@ -41,7 +41,6 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	foc_r = ifoc_r;
 	foc_mirror_size = ifoc_mirror_size;
 	foc_rot = ifoc_rot;
-	foc_yrot = 0;
 	sens_size = isens_size;
 	sens_rot = isens_rot;
 
@@ -148,6 +147,17 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	focYoff_threeSeg3 = 0;
 	focZoff_threeSeg3 = 0;
 
+	foc_yrot = 0;
+	foc_zrot = 0;
+
+	foc_yrot_threeSeg1 = 0;
+	foc_zrot_threeSeg1 = 0;
+
+	foc_yrot_threeSeg2 = 0;
+	foc_zrot_threeSeg2 = 0;
+
+	foc_yrot_threeSeg3 = 0;
+	foc_zrot_threeSeg3 = 0;
 
 	build_readout_box();
 }
@@ -202,28 +212,34 @@ void DircThreeSegBoxSim::print_model()
 	printf("  focMirrorTop     (mm): %12.04f\n",focMirrorTop);output_csv<<"focMirrorTop \t "<<focMirrorTop<<"\n";
 	printf("  focMirrorBottom  (mm): %12.04f\n",focMirrorBottom);output_csv<<"focMirrorBottom \t "<<focMirrorBottom<<"\n";
 	printf("  focMirrorZDim    (mm): %12.04f\n",focMirrorZDim);output_csv<<"focMirrorZDim \t "<<focMirrorZDim<<"\n";
-	printf("  theta_1  (deg): %12.04f\n",threeSeg_theta_1*rad2deg);output_csv<<"threeSeg_theta_1 \t "<<threeSeg_theta_1*rad2deg<<"\n";
-	printf("  theta_2  (deg): %12.04f\n",threeSeg_theta_2*rad2deg);output_csv<<"threeSeg_theta_2 \t "<<threeSeg_theta_2*rad2deg<<"\n";
-	printf("  theta_3  (deg): %12.04f\n",threeSeg_theta_3*rad2deg);output_csv<<"threeSeg_theta_3 \t "<<threeSeg_theta_3*rad2deg<<"\n";
-	printf("  seg_h     (mm): %12.04f\n",seg_h);output_csv<<"seg_h \t "<<seg_h<<"\n";
-	printf("  seg1Y     (mm): %12.04f\n",threeSeg1Y);output_csv<<"threeSeg1Y \t "<<threeSeg1Y<<"\n";
-	printf("  seg1Z     (mm): %12.04f\n",threeSeg1Z);output_csv<<"threeSeg1Z \t "<<threeSeg1Z<<"\n";
-	printf("  seg1Y_end (mm): %12.04f\n",threeSeg1Y_end);output_csv<<"threeSeg1Y_end \t "<<threeSeg1Y_end<<"\n";
-	printf("  seg1Z_end (mm): %12.04f\n",threeSeg1Z_end);output_csv<<"threeSeg1Z_end \t "<<threeSeg1Z_end<<"\n";
-	printf("  seg2Y     (mm): %12.04f\n",threeSeg2Y);output_csv<<"threeSeg2Y \t "<<threeSeg2Y<<"\n";
-	printf("  seg2Z     (mm): %12.04f\n",threeSeg2Z);output_csv<<"threeSeg2Z \t "<<threeSeg2Z<<"\n";
-	printf("  seg2Y_end (mm): %12.04f\n",threeSeg2Y_end);output_csv<<"threeSeg2Y_end \t "<<threeSeg2Y_end<<"\n";
-	printf("  seg2Z_end (mm): %12.04f\n",threeSeg2Z_end);output_csv<<"threeSeg2Z_end \t "<<threeSeg2Z_end<<"\n";
-	printf("  seg3Y     (mm): %12.04f\n",threeSeg3Y);output_csv<<"threeSeg3Y \t "<<threeSeg3Y<<"\n";
-	printf("  seg3Z     (mm): %12.04f\n",threeSeg3Z);output_csv<<"threeSeg3Z \t "<<threeSeg3Z<<"\n";
-	printf("  seg3Y_end (mm): %12.04f\n",threeSeg3Y_end);output_csv<<"threeSeg3Y_end \t "<<threeSeg3Y_end<<"\n";
-	printf("  seg3Z_end (mm): %12.04f\n",threeSeg3Z_end);output_csv<<"threeSeg3Z_end \t "<<threeSeg3Z_end<<"\n";
-	printf("  Yoff      (mm): %12.04f\n",focYoff);output_csv<<"focYoff \t "<<focYoff<<"\n";
-	printf("  Zoff      (mm): %12.04f\n",focZoff);output_csv<<"focZoff \t "<<focZoff<<"\n";
-	printf("  Yrot     (deg): %12.04f\n",foc_yrot);output_csv<<"foc_yrot \t "<<foc_yrot<<"\n";
-	printf("  Zrot     (deg): %12.04f\n",foc_zrot);output_csv<<"foc_zrot \t "<<foc_zrot<<"\n";
-	printf("  size      (mm): %12.04f\n",foc_mirror_size);output_csv<<"foc_mirror_size \t "<<foc_mirror_size<<"\n";
-	printf("  r         (mm): %12.04f\n",foc_r);output_csv<<"foc_r \t "<<foc_r<<"\n";
+	printf("  theta_1   (deg): %12.04f\n",threeSeg_theta_1*rad2deg);output_csv<<"threeSeg_theta_1 \t "<<threeSeg_theta_1*rad2deg<<"\n";
+	printf("  theta_2   (deg): %12.04f\n",threeSeg_theta_2*rad2deg);output_csv<<"threeSeg_theta_2 \t "<<threeSeg_theta_2*rad2deg<<"\n";
+	printf("  theta_3   (deg): %12.04f\n",threeSeg_theta_3*rad2deg);output_csv<<"threeSeg_theta_3 \t "<<threeSeg_theta_3*rad2deg<<"\n";
+	printf("  seg_h      (mm): %12.04f\n",seg_h);output_csv<<"seg_h \t "<<seg_h<<"\n";
+	printf("  seg1Y      (mm): %12.04f\n",threeSeg1Y);output_csv<<"threeSeg1Y \t "<<threeSeg1Y<<"\n";
+	printf("  seg1Z      (mm): %12.04f\n",threeSeg1Z);output_csv<<"threeSeg1Z \t "<<threeSeg1Z<<"\n";
+	printf("  seg1Y_end  (mm): %12.04f\n",threeSeg1Y_end);output_csv<<"threeSeg1Y_end \t "<<threeSeg1Y_end<<"\n";
+	printf("  seg1Z_end  (mm): %12.04f\n",threeSeg1Z_end);output_csv<<"threeSeg1Z_end \t "<<threeSeg1Z_end<<"\n";
+	printf("  seg2Y      (mm): %12.04f\n",threeSeg2Y);output_csv<<"threeSeg2Y \t "<<threeSeg2Y<<"\n";
+	printf("  seg2Z      (mm): %12.04f\n",threeSeg2Z);output_csv<<"threeSeg2Z \t "<<threeSeg2Z<<"\n";
+	printf("  seg2Y_end  (mm): %12.04f\n",threeSeg2Y_end);output_csv<<"threeSeg2Y_end \t "<<threeSeg2Y_end<<"\n";
+	printf("  seg2Z_end  (mm): %12.04f\n",threeSeg2Z_end);output_csv<<"threeSeg2Z_end \t "<<threeSeg2Z_end<<"\n";
+	printf("  seg3Y      (mm): %12.04f\n",threeSeg3Y);output_csv<<"threeSeg3Y \t "<<threeSeg3Y<<"\n";
+	printf("  seg3Z      (mm): %12.04f\n",threeSeg3Z);output_csv<<"threeSeg3Z \t "<<threeSeg3Z<<"\n";
+	printf("  seg3Y_end  (mm): %12.04f\n",threeSeg3Y_end);output_csv<<"threeSeg3Y_end \t "<<threeSeg3Y_end<<"\n";
+	printf("  seg3Z_end  (mm): %12.04f\n",threeSeg3Z_end);output_csv<<"threeSeg3Z_end \t "<<threeSeg3Z_end<<"\n";
+	printf("  Yoff       (mm): %12.04f\n",focYoff);output_csv<<"focYoff \t "<<focYoff<<"\n";
+	printf("  Zoff       (mm): %12.04f\n",focZoff);output_csv<<"focZoff \t "<<focZoff<<"\n";
+	printf("  Yrot      (deg): %12.04f\n",foc_yrot);output_csv<<"foc_yrot \t "<<foc_yrot<<"\n";
+	printf("  Zrot      (deg): %12.04f\n",foc_zrot);output_csv<<"foc_zrot \t "<<foc_zrot<<"\n";
+	printf("  Yrot_seg1 (deg): %12.04f\n",foc_yrot_threeSeg1);output_csv<<"foc_yrot_threeSeg1 \t "<<foc_yrot_threeSeg1<<"\n";
+	printf("  Zrot_seg1 (deg): %12.04f\n",foc_zrot_threeSeg1);output_csv<<"foc_zrot_threeSeg1 \t "<<foc_zrot_threeSeg1<<"\n";
+	printf("  Yrot_seg2 (deg): %12.04f\n",foc_yrot_threeSeg2);output_csv<<"foc_yrot_threeSeg2 \t "<<foc_yrot_threeSeg2<<"\n";
+	printf("  Zrot_seg2 (deg): %12.04f\n",foc_zrot_threeSeg2);output_csv<<"foc_zrot_threeSeg2 \t "<<foc_zrot_threeSeg2<<"\n";
+	printf("  Yrot_seg3 (deg): %12.04f\n",foc_yrot_threeSeg3);output_csv<<"foc_yrot_threeSeg3 \t "<<foc_yrot_threeSeg3<<"\n";
+	printf("  Zrot_seg3 (deg): %12.04f\n",foc_zrot_threeSeg3);output_csv<<"foc_zrot_threeSeg3 \t "<<foc_zrot_threeSeg3<<"\n";
+	printf("  size       (mm): %12.04f\n",foc_mirror_size);output_csv<<"foc_mirror_size \t "<<foc_mirror_size<<"\n";
+	printf("  r          (mm): %12.04f\n",foc_r);output_csv<<"foc_r \t "<<foc_r<<"\n";
 
 	printf("\n   Big Flat Mirror:\n");
 	printf("  minZ  (mm): %12.04f\n",largePlanarMirrorMinZ);output_csv<<"largePlanarMirrorMinZ \t "<<largePlanarMirrorMinZ<<"\n";
@@ -303,22 +319,22 @@ void DircThreeSegBoxSim::convert_particle_kinematics(double &particle_x,\
         double remainder_y = 0.;
         if (particle_y_hall < 0. && particle_y_hall > (B11A_y - barWidth/2.)/10.)
 	{
-		printf("here \n");
                 dist_y = B00A_y + barWidth/2. - particle_y_hall*10.;
 	}
         else if (particle_y_hall < (B12A_y + barWidth/2.)/10. && particle_y_hall > (B23A_y-barWidth/2.)/10.)
 	{
-		printf("here2 \n");
                 dist_y = B00A_y + barWidth/2. - particle_y_hall*10. - distDCBR11DCBR12 + barWidth + 0.15;
 	}
         else
                 printf("bar position for the upper bars not implemented yet. \n");
   	remainder_y = fmod(dist_y,barWidth+0.15);
      	particle_bar = double(int((dist_y-remainder_y)/(barWidth+0.15)));
+/*
 	printf("dist1112 = %12.04f\n",distDCBR11DCBR12);
 	printf("dist_y = %12.04f\n",dist_y);
 	printf("particle_bar = %12.04f\n",particle_bar);
 	printf("remainder_y  = %12.04f\n",remainder_y);
+*/
         if (remainder_y < barWidth/2.)
                 particle_x = barWidth/2. - remainder_y;
         else if (remainder_y < barWidth)
@@ -583,22 +599,28 @@ void DircThreeSegBoxSim::fill_threeseg_plane_vecs() {
 	threeSeg1Nx = 0;
 	threeSeg1Ny = sin(threeSeg_theta_1);
 	threeSeg1Nz = cos(threeSeg_theta_1);
-	rotate_2d(threeSeg1Nx,threeSeg1Nz,cos(foc_yrot/57.3),sin(foc_yrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
-	rotate_2d(threeSeg1Nx,threeSeg1Ny,cos(foc_zrot/57.3),sin(foc_zrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
+	//rotate_2d(threeSeg1Nx,threeSeg1Nz,cos(foc_yrot/57.3),sin(foc_yrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
+	//rotate_2d(threeSeg1Nx,threeSeg1Ny,cos(foc_zrot/57.3),sin(foc_zrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
+	rotate_2d(threeSeg1Nx,threeSeg1Nz,cos(foc_yrot_threeSeg1/57.3),sin(foc_yrot_threeSeg1/57.3));
+	rotate_2d(threeSeg1Nx,threeSeg1Ny,cos(foc_zrot_threeSeg1/57.3),sin(foc_zrot_threeSeg1/57.3));
 	threeSeg1D = threeSeg1Ny*threeSeg1Y + threeSeg1Nz*threeSeg1Z;//Use point x=0 as reference
 
 	threeSeg2Nx = 0;
 	threeSeg2Ny = sin(threeSeg_theta_2);
 	threeSeg2Nz = cos(threeSeg_theta_2);
-	rotate_2d(threeSeg2Nx,threeSeg2Nz,cos(foc_yrot/57.3),sin(foc_yrot/57.3));
-	rotate_2d(threeSeg2Nx,threeSeg2Ny,cos(foc_zrot/57.3),sin(foc_zrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
+	//rotate_2d(threeSeg2Nx,threeSeg2Nz,cos(foc_yrot/57.3),sin(foc_yrot/57.3));
+	//rotate_2d(threeSeg2Nx,threeSeg2Ny,cos(foc_zrot/57.3),sin(foc_zrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
+	rotate_2d(threeSeg2Nx,threeSeg2Nz,cos(foc_yrot_threeSeg2/57.3),sin(foc_yrot_threeSeg2/57.3));
+	rotate_2d(threeSeg2Nx,threeSeg2Ny,cos(foc_zrot_threeSeg2/57.3),sin(foc_zrot_threeSeg2/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
 	threeSeg2D = threeSeg2Ny*threeSeg2Y + threeSeg2Nz*threeSeg2Z;//Use point x=0 as reference
 
 	threeSeg3Nx = 0;
 	threeSeg3Ny = sin(threeSeg_theta_3);
 	threeSeg3Nz = cos(threeSeg_theta_3);
-	rotate_2d(threeSeg3Nx,threeSeg3Nz,cos(foc_yrot/57.3),sin(foc_yrot/57.3));
-	rotate_2d(threeSeg3Nx,threeSeg3Ny,cos(foc_zrot/57.3),sin(foc_zrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
+	//rotate_2d(threeSeg3Nx,threeSeg3Nz,cos(foc_yrot/57.3),sin(foc_yrot/57.3));
+	//rotate_2d(threeSeg3Nx,threeSeg3Ny,cos(foc_zrot/57.3),sin(foc_zrot/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
+	rotate_2d(threeSeg3Nx,threeSeg3Nz,cos(foc_yrot_threeSeg3/57.3),sin(foc_yrot_threeSeg3/57.3));
+	rotate_2d(threeSeg3Nx,threeSeg3Ny,cos(foc_zrot_threeSeg3/57.3),sin(foc_zrot_threeSeg3/57.3));//I think this is a slightly wrong rotation if the mirrors are carved out of a solid block, but it should be good enough at small angles
 	threeSeg3D = threeSeg3Ny*threeSeg3Y + threeSeg3Nz*threeSeg3Z;//Use point x=0 as reference
 
 }
@@ -673,6 +695,16 @@ void DircThreeSegBoxSim::set_focus_mirror_angle(double ang,double yang, double z
 	foc_rot = ang;
 	foc_yrot = yang;
 	foc_zrot = zang;
+
+	foc_yrot_threeSeg1 = yang;
+	foc_zrot_threeSeg1 = zang;
+
+	foc_yrot_threeSeg2 = yang;
+	foc_zrot_threeSeg2 = zang;
+
+	foc_yrot_threeSeg3 = yang;
+	foc_zrot_threeSeg3 = zang;
+
 	build_readout_box();
 }
 void DircThreeSegBoxSim::set_pmt_angle(double ang) {

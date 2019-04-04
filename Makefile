@@ -7,13 +7,19 @@ CFLAGS = $(CFLAGS_BASE) $(goptical_CPPFLAGS)
 
 LIBLOC = ./lib
 #OUT = ./hdfastdirc_sim
-OUT = ./hdfastdirc
+#OUT = ./hdfastdirc
+OUT = ./hdfastdirc_treeInput
 
 OBJFILES = dirc_base_sim.o
 OBJFILES += dirc_threesegbox_sim.o
 OBJFILES += dirc_rect_digitizer.o
 OBJFILES += dirc_spread_gaussian.o
 OBJFILES += GlueXUserOptions.o
+#OBJFILES += DrcHit.o
+#OBJFILES += DrcEvent.o
+
+DRCLIB = /home/yunjiey/Documents/gluex_install/gluex_top/halld_recon/Linux_Ubuntu16.04-x86_64-gcc5.4.0/plugins/pid_dirc.so
+#DRCLIB = /home/yunjiey/Documents/gluex_install/gluex_top/halld_recon/Linux_Ubuntu16.04-x86_64-gcc5.4.0/plugins/dirc_tree.so
 
 #OBJFILES += dirc_optical_sim.o
 #OBJFILES += dirc_babar_sim.o
@@ -39,7 +45,7 @@ vpath %.cpp ./src/
 
 .PHONY : all
 all: $(OUT).cpp $(OBJFILES)
-	g++ -Wall $(OUT).cpp $(OBJLOC) $(CFLAGS) $(INCLUDE) -o $(OUT)
+	g++ -Wall $(OUT).cpp $(OBJLOC) $(DRCLIB) $(CFLAGS) $(INCLUDE) -o $(OUT)
 
 .PHONY : libs
 libs: $(OBJFILES)

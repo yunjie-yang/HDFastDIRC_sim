@@ -45,9 +45,6 @@ protected:
 	double focYoff;
 	double focZoff;
 
-	double foc_yrot;
-	double foc_zrot;
-
 	double focYoff_threeSeg1;
 	double focZoff_threeSeg1;
 
@@ -56,6 +53,18 @@ protected:
 
 	double focYoff_threeSeg3;
 	double focZoff_threeSeg3;
+
+	double foc_yrot;
+	double foc_zrot;
+
+	double foc_yrot_threeSeg1;
+	double foc_zrot_threeSeg1;
+
+	double foc_yrot_threeSeg2;
+	double foc_zrot_threeSeg2;
+
+	double foc_yrot_threeSeg3;
+	double foc_zrot_threeSeg3;
 
 	bool nonUniformFocMirror;
 	double foc_mirror_nonuni;

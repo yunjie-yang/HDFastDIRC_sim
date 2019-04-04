@@ -28,6 +28,7 @@ private:
 	double PMT_SIZE_GAP = PMT_SIZE + PMT_GAP;
 
 	int find_pixel(double x);
+	double find_coordinate(int pixel_index);
 	
 public:
 	DircRectDigitizer(\
@@ -40,7 +41,20 @@ public:
 		double it_unc,\
 		double it_bin_size);
 
+	int GetPmtID      ( int channel ) const;
+	int GetPmtRow     ( int channel ) const;
+	int GetPmtColumn  ( int channel ) const;
+	int GetPixelID      ( int channel ) const;
+	int GetPmtPixelRow     ( int channel ) const;
+	int GetPmtPixelColumn  ( int channel ) const;
+	int GetPixelRow     ( int channel ) const;
+	int GetPixelColumn  ( int channel ) const;
+
 	void digitize_point(dirc_point &pt);
 	void digitize_points(std::vector<dirc_point> &points);
+
+	void undigitize_point(dirc_point &pt);
+	void undigitize_points(std::vector<dirc_point> &points);
+	
 };
 #endif
