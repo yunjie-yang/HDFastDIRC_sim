@@ -109,6 +109,12 @@ double runGraphicHistos(TString ifile = "tmpfitdirc.root", bool verbose_out=true
 		hkaon = (TH1F*) f1->Get("ll_diff_kaon_down");
 		phots_pion = (TH1F*) f1->Get("phot_found_pion_down");
 	}
+	else if (iupdown == 2)
+	{
+		hpion = (TH1F*) f1->Get("ll_diff_pion_tree");
+		hkaon = (TH1F*) f1->Get("ll_diff_kaon_tree");
+		phots_pion = (TH1F*) f1->Get("Nph_tree");
+	}
 	else
 	{
 		printf("Unrecognize updown arguement: %d \nFailing....\n",iupdown);

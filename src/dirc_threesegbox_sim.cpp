@@ -272,7 +272,7 @@ void DircThreeSegBoxSim::print_model()
 	output_csv.close();
 }
 
-void DircThreeSegBoxSim::convert_particle_kinematics(double &particle_x,\
+bool DircThreeSegBoxSim::convert_particle_kinematics(double &particle_x,\
                                                 double &particle_y,\
                                                 double &particle_theta,\
                                                 double &particle_phi,\
@@ -312,8 +312,10 @@ void DircThreeSegBoxSim::convert_particle_kinematics(double &particle_x,\
         // particle_y
         particle_y = barLength/2. - (particle_x_hall*10. - B00A_x);
         if (particle_y < -barLength/2.)
+	{
                 printf("This shouldn't happen -- track not hitting any bar.\n");
-
+		return false;
+	}
         // particle_bar, particle_x
         double dist_y = 0.;
         double remainder_y = 0.;
@@ -326,8 +328,11 @@ void DircThreeSegBoxSim::convert_particle_kinematics(double &particle_x,\
                 dist_y = B00A_y + barWidth/2. - particle_y_hall*10. - distDCBR11DCBR12 + barWidth + 0.15;
 	}
         else
+	{
                 printf("bar position for the upper bars not implemented yet. \n");
-  	remainder_y = fmod(dist_y,barWidth+0.15);
+		return false;
+	} 
+ 	remainder_y = fmod(dist_y,barWidth+0.15);
      	particle_bar = double(int((dist_y-remainder_y)/(barWidth+0.15)));
 /*
 	printf("dist1112 = %12.04f\n",distDCBR11DCBR12);
@@ -340,9 +345,12 @@ void DircThreeSegBoxSim::convert_particle_kinematics(double &particle_x,\
         else if (remainder_y < barWidth)
                 particle_x = remainder_y - barWidth/2.;
         else
+	{
                 printf("particle hitting in between bars \n");
+		return false;
+	}
 
-
+	return true;
 }
 
 

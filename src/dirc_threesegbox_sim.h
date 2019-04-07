@@ -238,7 +238,7 @@ public:
 	void set_large_mirror_zs(double imin, double imax);
 	void set_mirror_plane_offsets(double off_y, double off_z);
 
-        void convert_particle_kinematics(double &particle_x,\
+        bool convert_particle_kinematics(double &particle_x,\
                                         double &particle_y,\
                                         double &particle_theta,\
                                         double &particle_phi,\

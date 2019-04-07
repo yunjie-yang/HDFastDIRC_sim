@@ -110,8 +110,8 @@ int main(int nargs, char* argv[])
 
 	int n_sim_phots = 40;
 
-	int n_phi_phots = 150000;
-	//int n_phi_phots = 150;
+	//int n_phi_phots = 150000;
+	int n_phi_phots = 5000;
 	int n_z_phots = 4;
 
 	bool use_quartz_for_liquid = false;
@@ -152,6 +152,7 @@ int main(int nargs, char* argv[])
 	TH2F *kaon_dist_xt = new TH2F("kaon_dist_xt","xt val of intercepted points - kaon",(maxx-minx)/(res_enhance*resx),minx,maxx,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *kaon_dist_yt = new TH2F("kaon_dist_yt","yt val of intercepted points - kaon",(maxy-miny)/(res_enhance*resy),miny,maxy,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *kaon_dist_rowcol = new TH2F("kaon_dist_rowcol","hit pattern - kaon; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
+	TH3F *kaon_dist_3D = new TH3F("kaon_dist_3D","(x,y,t) - pion; Pixel Row ; Pixel Column ; Hit Time (ns)",144,-0.5,143.5,48,-0.5,47.5,300,0,300);
 
         TH1F *ll_diff_pion = new TH1F("ll_diff_pion","Difference of log likelihood real = pion",200000,-200,200);
         TH1F *ll_diff_kaon = new TH1F("ll_diff_kaon","Difference of log likelihood real = kaon",200000,-200,200);
@@ -458,11 +459,8 @@ int main(int nargs, char* argv[])
 	/***********              Fill hit histograms           *******************/
 	/**************************************************************************/
 
-	if (SIM_ONLY)
-	{
-		digitizer.digitize_points(hit_points_pion);
-		digitizer.digitize_points(hit_points_kaon);
-	}
+	digitizer.digitize_points(hit_points_pion);
+	digitizer.digitize_points(hit_points_kaon);
 
 	double x,y,t_ns;
 	int pixel_row;
@@ -523,6 +521,7 @@ int main(int nargs, char* argv[])
 	kaon_dist_yt->Write();
 	kaon_dist_t->Write();
 	kaon_dist_rowcol->Write();
+	kaon_dist_3D->Write();
 
         ll_diff_pion->Write();
         ll_diff_kaon->Write();

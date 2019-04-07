@@ -113,7 +113,9 @@ int main(int nargs, char* argv[])
 
 	int n_sim_phots = 40;
 
-	int n_phi_phots = 150000;
+	//int n_phi_phots = 150000;
+	//int n_phi_phots = 15000;
+	int n_phi_phots = 5000;
 	int n_z_phots = 4;
 
 	bool use_quartz_for_liquid = false;
@@ -150,7 +152,6 @@ int main(int nargs, char* argv[])
 	TH2F *pion_dist_xt = new TH2F("pion_dist_xt","xt val of intercepted points - pion",(maxx-minx)/(res_enhance*resx),minx,maxx,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *pion_dist_yt = new TH2F("pion_dist_yt","yt val of intercepted points - pion",(maxy-miny)/(res_enhance*resy),miny,maxy,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
-	//TH2F *pion_dist_rowcol = new TH2F("pion_dist_rowcol","hit pattern - pion; Pixel Row ; Pixel Column",190,-10.5,180.5,70,-9.5,60.5);
 	TH3F *pion_dist_3D = new TH3F("pion_dist_3D","(x,y,t) - pion; Pixel Row ; Pixel Column ; Hit Time (ns)",144,-0.5,143.5,48,-0.5,47.5,300,0,300);
 
 
@@ -161,14 +162,23 @@ int main(int nargs, char* argv[])
 	TH2F *kaon_dist_xt = new TH2F("kaon_dist_xt","xt val of intercepted points - kaon",(maxx-minx)/(res_enhance*resx),minx,maxx,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *kaon_dist_yt = new TH2F("kaon_dist_yt","yt val of intercepted points - kaon",(maxy-miny)/(res_enhance*resy),miny,maxy,(maxt-mint)/(res_enhance*rest),mint,maxt);
 	TH2F *kaon_dist_rowcol = new TH2F("kaon_dist_rowcol","hit pattern - kaon; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
+	TH3F *kaon_dist_3D = new TH3F("kaon_dist_3D","(x,y,t) - kaon; Pixel Row ; Pixel Column ; Hit Time (ns)",144,-0.5,143.5,48,-0.5,47.5,300,0,300);
 
         TH1F *ll_diff_pion = new TH1F("ll_diff_pion","Difference of log likelihood real = pion",200000,-200,200);
         TH1F *ll_diff_kaon = new TH1F("ll_diff_kaon","Difference of log likelihood real = kaon",200000,-200,200);
         TH1F *phot_found_pion = new TH1F("phot_found_pion","number of photons found on pion angle", 1001,-.5,1000.5);
         TH1F *phot_found_kaon = new TH1F("phot_found_kaon","number of photons found on kaon angle", 1001,-.5,1000.5);
 
-	TH2F *hit_dist_rowcol_tree = new TH2F("hit_dist_rowcol_tree","hit pattern; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
 
+	TH2F *hit_dist_rowcol_tree = new TH2F("hit_dist_rowcol_tree","hit pattern; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
+	TH1F *hit_dist_t_tree = new TH1F("hit_dist_t_tree","hit time ; hit time (ns);",(maxt-mint)/(res_enhance*rest),mint,maxt);
+
+        TH1F *ll_diff_tree = new TH1F("ll_diff_tree","Difference of log likelihood",200000,-200,200);
+
+        TH1F *ll_diff_pion_tree = new TH1F("ll_diff_pion_tree","Difference of log likelihood (pion selection)",200000,-200,200);
+        TH1F *ll_diff_kaon_tree = new TH1F("ll_diff_kaon_tree","Difference of log likelihood (kaon selection)",200000,-200,200);
+
+        TH1F *Nph_tree = new TH1F("Nph_tree","number of photons", 1001,-.5,1000.5);
 
 	double pion_beta, kaon_beta;
 	pion_beta=kaon_beta=-1;
@@ -198,6 +208,8 @@ int main(int nargs, char* argv[])
 	if (user_opts.Find("DIRCTREE_INFILE", opt_str)) sprintf(dirctree_filename,"%s",opt_str[1].c_str());
 	if (user_opts.Find("GEOMETRY_INFILE", opt_str)) sprintf(geometry_infilename,"%s",opt_str[1].c_str());
 	if (user_opts.Find("GEOMETRY_OUTFILE", opt_str)) sprintf(geometry_outfilename,"%s",opt_str[1].c_str());
+
+	if (user_opts.Find("N_PHI_PHOTS", opt_int)) n_phi_phots = opt_int[1];
 
 	if (user_opts.Find("PARTICLE_BAR", opt_val)) particle_bar = double(opt_val[1]);
 	if (user_opts.Find("E", opt_val)) energy = opt_val[1];
@@ -317,10 +329,13 @@ int main(int nargs, char* argv[])
 	double particle_x_tree     = 0.;
 	double particle_y_tree     = 0.;
 	double particle_z_tree     = 0.;
+	double particle_t_tree     = 0.;
+	int    particle_pid_tree   = 0.;
 	
 	int hit_ChannelId   = -1;
 	int hit_pixelrow = -1;
 	int hit_pixelcol = -1;
+	double hit_t   = -1;
 
 	TVector3 particle_p3_tree, particle_x3_tree;
 
@@ -336,10 +351,15 @@ int main(int nargs, char* argv[])
 	std::vector<dirc_point> tree_points;
 
 	double ll_pion(0.),ll_kaon(0.);
+	double ll_pion_tree(0.),ll_kaon_tree(0.);
 
 	int counter = 0;
 
-	//for (int event_i = 0 ; event_i < 2000 ; event_i++)
+	int locPID_bin = 0;
+
+	bool locGoodParticle = false;
+
+	//for (int event_i = 0 ; event_i < 15001 ; event_i++)
 	for (int event_i = 0 ; event_i < event_chain->GetEntries() ; event_i++)
 	{
 	event_chain->GetEntry(event_i);
@@ -350,8 +370,11 @@ int main(int nargs, char* argv[])
 	{
 		
 		evt = (DrcEvent*) particle_array->At(particle_i);
-		particle_p3_tree = evt->GetMomentum();
-		particle_x3_tree = evt->GetPosition();
+		particle_p3_tree    = evt->GetMomentum();
+		particle_x3_tree    = evt->GetPosition();
+		particle_t_tree     = evt->GetTime();
+		particle_pid_tree   = evt->GetPdg();
+
 		particle_mom_tree   = particle_p3_tree.Mag();
 		particle_theta_tree = particle_p3_tree.Theta()*rad2deg; 
 		particle_phi_tree   = particle_p3_tree.Phi()*rad2deg; 
@@ -359,11 +382,25 @@ int main(int nargs, char* argv[])
 		particle_y_tree     = particle_x3_tree.Y(); 
 		particle_z_tree     = particle_x3_tree.Z(); 
 
+		if (particle_mom_tree < 2.8 || particle_mom_tree > 3.2) continue;
 		//if (particle_mom_tree < 3.8 || particle_mom_tree > 4.2) continue;
-		if (particle_mom_tree < 4) continue;
-		if (particle_x_tree > 5. || particle_x_tree < 0.) continue;
-		//if (particle_y_tree > -12.0858 || particle_y_tree < -15.5858) continue;//bar 1 
-		if (particle_y_tree > -19.1158 || particle_y_tree < -22.6158) continue;//bar 3
+		//if (particle_mom_tree < 4) continue;
+		//if (particle_mom_tree > 3) continue;
+
+		//if (particle_x_tree > 5. || particle_x_tree < 0.) continue;
+		//if (particle_y_tree > -19.1158 || particle_y_tree < -22.6158) continue;//bar 3
+
+		if (abs(particle_pid_tree)==211)
+			locPID_bin = 1;
+		else if (abs(particle_pid_tree)==321)
+			locPID_bin = 2;
+		else
+			continue;
+
+		locGoodParticle = dirc_model->convert_particle_kinematics(particle_x,particle_y,particle_theta,particle_phi,particle_bar,particle_x_tree,particle_y_tree,particle_theta_tree,particle_phi_tree);
+
+		if (!locGoodParticle)
+			continue;
 
 		counter++;
 /*
@@ -373,27 +410,48 @@ int main(int nargs, char* argv[])
 			continue;
 		}
 */
+
+		//printf("\n\n\n Event #%d ; nhits = %d ; PDG = %d\n",event_i,evt->GetHitSize(),particle_pid_tree);
 		for (auto hit : evt->GetHits())
 		{
 			dirc_point tree_point;
 			hit_ChannelId   = hit.GetChannel();
+			hit_t           = hit.GetLeadTime() - particle_t_tree;	
 			hit_pixelrow    = digitizer.GetPixelRow(hit_ChannelId);
 			hit_pixelcol    = digitizer.GetPixelColumn(hit_ChannelId);
+
+/*
+			printf("\n\n hit info : \n");
+			printf("ChannelId = %4d ; t = %8.04f ; pixel_row = %4d ; pixel_col = %4d\n",hit_ChannelId,hit_t,hit_pixelrow,hit_pixelcol);
+*/
 			hit_dist_rowcol_tree -> Fill(hit_pixelrow,hit_pixelcol); 
+			hit_dist_t_tree -> Fill(hit_t); 
 			tree_point.pixel_row = hit_pixelrow;
 			tree_point.pixel_col = hit_pixelcol;
-			tree_points.push_back(tree_point);
-		}
-	
-		dirc_model->convert_particle_kinematics(particle_x,particle_y,particle_theta,particle_phi,particle_bar,\
-							particle_x_tree,particle_y_tree,particle_theta_tree,particle_phi_tree);
+			tree_point.t         = hit_t;
 
+/*
+			printf(" tree_point (before) : \n");
+			printf("x = %8.04f ; y = %8.04f ; t = %8.04f ; pixel_row = %4d ; pixel_col = %4d\n",tree_point.x,tree_point.y,tree_point.t,tree_point.pixel_row,tree_point.pixel_col);
+*/
+
+			digitizer.undigitize_point(tree_point);
+/*
+			printf(" tree_point (after) : \n");
+			printf("x = %8.04f ; y = %8.04f ; t = %8.04f ; pixel_row = %4d ; pixel_col = %4d\n",tree_point.x,tree_point.y,tree_point.t,tree_point.pixel_row,tree_point.pixel_col);
+*/
+			tree_points.push_back(tree_point);
+
+		}
+
+		Nph_tree -> Fill(int(evt->GetHitSize()));
 	
 		loc_energy_pion = sqrt(particle_mom_tree*particle_mom_tree + pimass*pimass);
 		loc_energy_kaon = sqrt(particle_mom_tree*particle_mom_tree + kmass*kmass);
 
 		pion_beta = dirc_model->get_beta(loc_energy_pion,pimass);
-		kaon_beta = dirc_model->get_beta(loc_energy_kaon,pimass);
+		kaon_beta = dirc_model->get_beta(loc_energy_kaon,kmass);
+
 
                 dirc_model->sim_rand_n_photons(\
                                 sim_points_pion,\
@@ -408,8 +466,24 @@ int main(int nargs, char* argv[])
                                 0.,\
                                 ckov_unc/1.,\
                                 pion_beta);
-
                 digitizer.digitize_points(sim_points_pion);
+
+
+                dirc_model->sim_rand_n_photons(\
+                                sim_points_kaon,\
+                                n_sim_phots,\
+                                -1,\
+                                particle_bar,\
+                                particle_x,\
+                                particle_y,\
+                                0.,\
+                                particle_theta,\
+                                particle_phi,\
+                                0.,\
+                                ckov_unc/1.,\
+                                kaon_beta);
+                digitizer.digitize_points(sim_points_kaon);
+
 
         	double x,y,t_ns;
         	int pixel_row;
@@ -431,9 +505,28 @@ int main(int nargs, char* argv[])
                 	pion_dist_rowcol->Fill(sim_points_pion[i].pixel_row,sim_points_pion[i].pixel_col);
                 	pion_dist_3D->Fill(sim_points_pion[i].pixel_row,sim_points_pion[i].pixel_col,t_ns);
         	}
-		sim_points_pion.clear();
+		for (unsigned int i = 0; i < sim_points_kaon.size(); i++)
+		{
+			x = sim_points_kaon[i].x;
+			y = sim_points_kaon[i].y;
+			t_ns = sim_points_kaon[i].t;
+			pixel_row = sim_points_kaon[i].pixel_row;
+			if (SIM_ONLY && pixel_row<0) continue;
+			kaon_dist_x->Fill(x);
+			kaon_dist_y->Fill(y);
+			kaon_dist_t->Fill(t_ns);
+			kaon_dist_xy->Fill(x,y);
+			kaon_dist_xt->Fill(x,t_ns);
+			kaon_dist_yt->Fill(y,t_ns);
+			kaon_dist_t->Fill(t_ns);
 
-/*
+			kaon_dist_rowcol->Fill(sim_points_kaon[i].pixel_row,sim_points_kaon[i].pixel_col);
+                	kaon_dist_3D->Fill(sim_points_kaon[i].pixel_row,sim_points_kaon[i].pixel_col,t_ns);
+		}
+
+
+
+
 	        dirc_model->sim_reg_n_photons(\
         	                hit_points_pion,\
                 	        n_phi_phots,\
@@ -482,17 +575,29 @@ int main(int nargs, char* argv[])
                         	s_func_y,\
                         	s_func_t);
 
-		digitizer.undigitize_points(tree_points);
+		ll_pion_tree = pdf_pion->get_log_likelihood(tree_points);
+		ll_kaon_tree = pdf_kaon->get_log_likelihood(tree_points);
 
-		ll_pion = pdf_pion->get_log_likelihood(tree_points);
-		ll_kaon = pdf_kaon->get_log_likelihood(tree_points);
+		ll_diff_tree->Fill(1*(ll_pion_tree-ll_kaon_tree));
 
+		if (locPID_bin == 1)
+			ll_diff_pion_tree->Fill(1*(ll_pion_tree-ll_kaon_tree));
+		if (locPID_bin == 2)
+			ll_diff_kaon_tree->Fill(1*(ll_pion_tree-ll_kaon_tree));
+
+
+		ll_pion = pdf_pion->get_log_likelihood(sim_points_pion);
+		ll_kaon = pdf_kaon->get_log_likelihood(sim_points_pion);
 		ll_diff_pion->Fill(1*(ll_pion-ll_kaon));
 
-		phot_found_pion->Fill(tree_points.size());
-*/		
+		ll_pion = pdf_pion->get_log_likelihood(sim_points_kaon);
+		ll_kaon = pdf_kaon->get_log_likelihood(sim_points_kaon);
+		ll_diff_kaon->Fill(1*(ll_pion-ll_kaon));
 
-
+		tree_points.clear();
+		delete pdf_pion;
+		delete pdf_kaon;
+	
 	}
 
 	}
@@ -753,6 +858,13 @@ int main(int nargs, char* argv[])
         phot_found_kaon->Write();
 
 	hit_dist_rowcol_tree->Write();
+	hit_dist_t_tree->Write();
+
+        ll_diff_tree->Write();
+        ll_diff_pion_tree->Write();
+        ll_diff_kaon_tree->Write();
+	
+	Nph_tree -> Write();
 
 	tfile->Close();
 

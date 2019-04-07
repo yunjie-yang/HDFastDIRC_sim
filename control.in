@@ -1,4 +1,4 @@
-SIM_ONLY  1
+SIM_ONLY 0 
 
  OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen/hist_data.root'
  DIRCTREE_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/data_bggen/beam_tree_23_all.root'
@@ -6,6 +6,9 @@ SIM_ONLY  1
 c OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen/hist_bggen.root'
 c DIRCTREE_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/data_bggen/bggen_tree_23_all.root'
 
+c OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen/hist_fastdirc.root'
+
+N_PHI_PHOTS 25000
 
 GEOMETRY_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/FastDIRC_HDDS_Nominal.csv'
 GEOMETRY_OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen/dirc_model_geometry.csv'
