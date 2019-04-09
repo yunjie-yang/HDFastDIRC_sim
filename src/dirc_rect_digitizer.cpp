@@ -111,6 +111,16 @@ double DircRectDigitizer::find_coordinate(int pixel_index)
 	return pmt_i * PMT_SIZE_GAP + pmt_within_i * (PIXEL_SIZE + PIXEL_GAP) + 0.5 * PIXEL_SIZE;
 }
 
+void DircRectDigitizer::get_random_point(dirc_point &pt)
+{
+
+	pt.x = dig_rand->Rndm() * (PMT_SIZE_GAP * (PMT_ROWS - 1) + PMT_SIZE);
+	pt.y = dig_rand->Rndm() * (PMT_SIZE_GAP * (PMT_COLUMNS - 1) + PMT_SIZE);
+	pt.t = dig_rand->Rndm() * (350.);
+
+	digitize_point(pt);
+}
+
 int
 DircRectDigitizer::GetPmtID( int channel ) const 
 {

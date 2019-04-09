@@ -51,18 +51,9 @@ int main(int nargs, char* argv[])
 	double particle_phi = 0;
 	double particle_bar = 2;
 
-	double particle_x_hall     = 0;
-	double particle_y_hall     = 0;
-	double particle_theta_hall = 0;
-	double particle_phi_hall   = 0;
-
-
-	double particle_flight_distance = 0;
 
 	bool kaleidoscope_plot = false;
 	bool use_moliere_scattering = false;
-
-	int num_runs = 1000;
 
 	double wedge_uncertainty = 0/57.3;
 	double mirror_angle_change = 0;
@@ -89,7 +80,7 @@ int main(int nargs, char* argv[])
 
 	int rseed = 1337;
 
-	double tracking_unc = .0000*57.3; //mrad
+	//double tracking_unc = .0000*57.3; //mrad
 	double ckov_unc = .003*57.3; //transport = 3mrad
 
 	double resx = 6;
@@ -144,6 +135,8 @@ int main(int nargs, char* argv[])
 	char* dirctree_filename = new char[256];
 	sprintf(dirctree_filename,"dirc_tree.root");
 
+	int Nrandom_points = 7;
+
 	double res_enhance = 1;
 	TH1F *pion_dist_x = new TH1F("pion_dist_x","x val of intercepted points - pion",(maxx-minx)/(res_enhance*resx),minx,maxx);
 	TH1F *pion_dist_y = new TH1F("pion_dist_y","y val of intercepted points - pion",(maxy-miny)/(res_enhance*resy),miny,maxy);
@@ -164,6 +157,7 @@ int main(int nargs, char* argv[])
 	TH2F *kaon_dist_rowcol = new TH2F("kaon_dist_rowcol","hit pattern - kaon; Pixel Row ; Pixel Column",144,-0.5,143.5,48,-0.5,47.5);
 	TH3F *kaon_dist_3D = new TH3F("kaon_dist_3D","(x,y,t) - kaon; Pixel Row ; Pixel Column ; Hit Time (ns)",144,-0.5,143.5,48,-0.5,47.5,300,0,300);
 
+
         TH1F *ll_diff_pion = new TH1F("ll_diff_pion","Difference of log likelihood real = pion",200000,-200,200);
         TH1F *ll_diff_kaon = new TH1F("ll_diff_kaon","Difference of log likelihood real = kaon",200000,-200,200);
         TH1F *phot_found_pion = new TH1F("phot_found_pion","number of photons found on pion angle", 1001,-.5,1000.5);
@@ -178,12 +172,94 @@ int main(int nargs, char* argv[])
         TH1F *ll_diff_pion_tree = new TH1F("ll_diff_pion_tree","Difference of log likelihood (pion selection)",200000,-200,200);
         TH1F *ll_diff_kaon_tree = new TH1F("ll_diff_kaon_tree","Difference of log likelihood (kaon selection)",200000,-200,200);
 
+        TH1F *ll_diff_pion_inexact = new TH1F("ll_diff_pion_inexact","Difference of log likelihood (inexact) real = pion",200000,-200,200);
+        TH1F *ll_diff_kaon_inexact = new TH1F("ll_diff_kaon_inexact","Difference of log likelihood (inexact) real = kaon",200000,-200,200);
+
         TH1F *Nph_tree = new TH1F("Nph_tree","number of photons", 1001,-.5,1000.5);
+        TH1F *Nph_pion = new TH1F("Nph_pion","number of photons (real = pion)", 1001,-.5,1000.5);
+        TH1F *Nph_kaon = new TH1F("Nph_kaon","number of photons (real = kaon)", 1001,-.5,1000.5);
+
+
+	std::vector<std::vector<double>> PBins =  {
+								{0.,1.5},
+								{1.5, 2.5},
+								{2.5, 3.5},
+								{3.5, 4.5},
+								{4.5, 12.}
+							 };
+
+	int NumBinsLL = 200000;
+	double MinLL  = -200.;
+	double MaxLL  = 200.;
+
+	std::map<int,TH1F*> histMap_ll_diff_pion_tree;
+	std::map<int,TH1F*> histMap_ll_diff_kaon_tree;
+	std::map<int,TH1F*> histMap_ll_diff_pion_sim_exact;
+	std::map<int,TH1F*> histMap_ll_diff_kaon_sim_exact;
+	std::map<int,TH1F*> histMap_ll_diff_pion_sim_inexact;
+	std::map<int,TH1F*> histMap_ll_diff_kaon_sim_inexact;
+
+	int NumBinsNhits = 1000;
+	double MinNhits  = -0.5;
+	double MaxNhits  = 999.5;
+	std::map<int,TH1F*> histMap_Nhits_pion_tree;
+	std::map<int,TH1F*> histMap_Nhits_kaon_tree;
+	std::map<int,TH1F*> histMap_Nhits_pion_sim_inexact;
+	std::map<int,TH1F*> histMap_Nhits_kaon_sim_inexact;
+	for (size_t locPBin = 0 ; locPBin < PBins.size() ; locPBin++)
+	{
+		histMap_ll_diff_pion_tree[int(locPBin)] = new TH1F(Form("ll_diff_pion_tree_PBin%d",int(locPBin)),\
+								   Form("DLL (#pi selection), P: [%.1f,%.1f];DLL;",\
+								        PBins[locPBin][0],PBins[locPBin][1]),\
+								   NumBinsLL,MinLL,MaxLL);
+		histMap_ll_diff_kaon_tree[int(locPBin)] = new TH1F(Form("ll_diff_kaon_tree_PBin%d",int(locPBin)),\
+								   Form("DLL (K selection), P: [%.1f,%.1f];DLL;",\
+								        PBins[locPBin][0],PBins[locPBin][1]),\
+								   NumBinsLL,MinLL,MaxLL);
+		histMap_ll_diff_pion_sim_exact[int(locPBin)] = new TH1F(Form("ll_diff_pion_sim_exact_PBin%d",int(locPBin)),\
+								        Form("DLL (#pi sim), P: [%.1f,%.1f];DLL;",\
+								             PBins[locPBin][0],PBins[locPBin][1]),\
+								        NumBinsLL,MinLL,MaxLL);
+		histMap_ll_diff_kaon_sim_exact[int(locPBin)] = new TH1F(Form("ll_diff_kaon_sim_exact_PBin%d",int(locPBin)),\
+								        Form("DLL (K sim), P: [%.1f,%.1f];DLL;",\
+								             PBins[locPBin][0],PBins[locPBin][1]),\
+								        NumBinsLL,MinLL,MaxLL);
+		histMap_ll_diff_pion_sim_inexact[int(locPBin)] = new TH1F(Form("ll_diff_pion_sim_inexact_PBin%d",int(locPBin)),\
+									  Form("DLL (#pi sim), P: [%.1f,%.1f];DLL;",\
+									       PBins[locPBin][0],PBins[locPBin][1]),\
+									  NumBinsLL,MinLL,MaxLL);
+		histMap_ll_diff_kaon_sim_inexact[int(locPBin)] = new TH1F(Form("ll_diff_kaon_sim_inexact_PBin%d",int(locPBin)),\
+									  Form("DLL (K sim), P: [%.1f,%.1f];DLL;",\
+									       PBins[locPBin][0],PBins[locPBin][1]),\
+									  NumBinsLL,MinLL,MaxLL);
+
+		histMap_Nhits_pion_tree[int(locPBin)] = new TH1F(Form("Nhits_pion_tree_PBin%d",int(locPBin)),\
+								   Form("Nhits (#pi selection), P: [%.1f,%.1f];DLL;",\
+								        PBins[locPBin][0],PBins[locPBin][1]),\
+								   NumBinsNhits,MinNhits,MaxNhits);
+		histMap_Nhits_kaon_tree[int(locPBin)] = new TH1F(Form("Nhits_kaon_tree_PBin%d",int(locPBin)),\
+								   Form("Nhits (K selection), P: [%.1f,%.1f];DLL;",\
+								        PBins[locPBin][0],PBins[locPBin][1]),\
+								   NumBinsNhits,MinNhits,MaxNhits);
+		histMap_Nhits_pion_sim_inexact[int(locPBin)] = new TH1F(Form("Nhits_pion_sim_inexact_PBin%d",int(locPBin)),\
+									Form("Nhits (#pi sim), P: [%.1f,%.1f];DLL;",\
+									     PBins[locPBin][0],PBins[locPBin][1]),\
+									NumBinsNhits,MinNhits,MaxNhits);
+		histMap_Nhits_kaon_sim_inexact[int(locPBin)] = new TH1F(Form("Nhits_kaon_sim_inexact_PBin%d",int(locPBin)),\
+									Form("Nhits (K sim), P: [%.1f,%.1f];DLL;",\
+									     PBins[locPBin][0],PBins[locPBin][1]),\
+									NumBinsNhits,MinNhits,MaxNhits);
+	}
+
+
+
+
+
 
 	double pion_beta, kaon_beta;
 	pion_beta=kaon_beta=-1;
-	double pion_angle, kaon_angle;
-	pion_angle=kaon_angle = -1;
+	//double pion_angle, kaon_angle;
+	//pion_angle=kaon_angle = -1;
 
 	/**************************************************************************/
 	/***********               READ CONFIG                 ********************/
@@ -210,13 +286,6 @@ int main(int nargs, char* argv[])
 	if (user_opts.Find("GEOMETRY_OUTFILE", opt_str)) sprintf(geometry_outfilename,"%s",opt_str[1].c_str());
 
 	if (user_opts.Find("N_PHI_PHOTS", opt_int)) n_phi_phots = opt_int[1];
-
-	if (user_opts.Find("PARTICLE_BAR", opt_val)) particle_bar = double(opt_val[1]);
-	if (user_opts.Find("E", opt_val)) energy = opt_val[1];
-	if (user_opts.Find("PARTICLE_THETA", opt_val)) particle_theta_hall = opt_val[1];
-	if (user_opts.Find("PARTICLE_PHI", opt_val)) particle_phi_hall = opt_val[1];
-	if (user_opts.Find("PARTICLE_X", opt_val)) particle_x_hall = opt_val[1];
-	if (user_opts.Find("PARTICLE_Y", opt_val)) particle_y_hall = opt_val[1];
 
 	printf("SIM_ONLY         = %d \n",SIM_ONLY);
 	printf("OUTFILE          = %s \n", root_outfilename);
@@ -249,6 +318,7 @@ int main(int nargs, char* argv[])
 	double mirror_r_nominal  = -1200 + mirror_r_difference;
 	double pmt_angle_nominal = 47.87 + box_rot + mirror_angle_change;
 
+	// suppose this is the truth/reality
 	DircThreeSegBoxSim *dirc_model_truth = new DircThreeSegBoxSim(\
 			rseed,\
 			mirror_r_nominal,\
@@ -274,6 +344,30 @@ int main(int nargs, char* argv[])
 	dirc_model_truth->set_liquid_index(liquid_index);
 
 
+	// suppose this is what we thought/used as the truth
+	DircThreeSegBoxSim *dirc_model_used = new DircThreeSegBoxSim(\
+			rseed,\
+			mirror_r_nominal,\
+			foc_mirror_size,\
+			main_mirror_angle_nominal,\
+			600,\
+			pmt_angle_nominal,\
+			geometry_infilename);
+
+
+	dirc_model_used->set_focmirror_nonuniformity(main_mirror_nonuniformity);
+	dirc_model_used->set_wedge_mirror_rand(wedge_non_uniformity);
+
+
+	//various running condition controls
+	dirc_model_used->set_store_traveled(false);// uses LOTS of memory if set to true.
+	dirc_model_used->set_liquid_index(liquid_index);
+	dirc_model_used->set_kaleidoscope_plot(kaleidoscope_plot);
+	dirc_model_used->set_use_quartz_n_for_liquid(use_quartz_for_liquid);
+	dirc_model_used->set_use_moliere(use_moliere_scattering);
+	dirc_model_used->set_moliere_p(energy*1000);//assume momentum is the same for both for now - high energy;
+	dirc_model_used->set_liquid_absorbtion(liquid_absorbtion);
+	dirc_model_used->set_liquid_index(liquid_index);
 
 	/**************************************************************************/
 	/***********       APPY OFFSETS TO NOMINAL GEOMETRY       *****************/
@@ -281,6 +375,14 @@ int main(int nargs, char* argv[])
 
 	TRandom3 spread_ang(rseed+3);
 
+/*
+	dirc_model_truth->set_focus_mirror_angle(			\
+					   spread_ang.Gaus(main_mirror_angle_nominal,mirror_angle_change_unc)+main_mirror_angle_off, \
+					   3., \
+					   main_mirror_zangle_off);
+*/
+
+/*
 	dirc_model_truth->set_pmt_offset(pmt_offset);
 	dirc_model_truth->set_upper_wedge_angle_diff(wedge_uncertainty);
 	dirc_model_truth->set_bar_box_angle(bar_box_box_angle);
@@ -305,8 +407,38 @@ int main(int nargs, char* argv[])
 						 bar_box_yoff,\
 						 bar_box_zoff);
 
-	dirc_model_truth->set_geometry_outfile(geometry_outfilename);
+	//dirc_model_truth->set_geometry_outfile(geometry_outfilename);
 	//dirc_model_truth->print_model();
+*/
+
+	// Construct the "used" model by applying some offsets
+	dirc_model_used->set_pmt_offset(pmt_offset);
+	dirc_model_used->set_upper_wedge_angle_diff(wedge_uncertainty);
+	dirc_model_used->set_bar_box_angle(bar_box_box_angle);
+
+	dirc_model_used->set_mirror_plane_offsets(foc_mirror_yoff,foc_mirror_zoff);
+
+
+	dirc_model_used->set_pmt_offset(pmt_offset);
+	dirc_model_used->set_pmt_angle(47.87+pmt_angle_offset);
+
+	dirc_model_used->set_focus_mirror_angle(			\
+					   spread_ang.Gaus(main_mirror_angle_nominal,mirror_angle_change_unc)+main_mirror_angle_off, \
+					   spread_ang.Gaus(0,mirror_angle_change_yunc)+main_mirror_yangle_off, \
+					   main_mirror_zangle_off);
+
+	dirc_model_used->set_mirror_plane_offsets(			\
+						 main_mirror_yoff,	\
+						 main_mirror_zoff);
+
+	dirc_model_used->set_bar_box_offsets(\
+						 bar_box_xoff,\
+						 bar_box_yoff,\
+						 bar_box_zoff);
+
+	dirc_model_used->set_geometry_outfile(geometry_outfilename);
+	dirc_model_used->print_model();
+
 
 	printf("\n DIRC model all set. \n");
 
@@ -329,7 +461,6 @@ int main(int nargs, char* argv[])
 	double particle_phi_tree   = 0.;
 	double particle_x_tree     = 0.;
 	double particle_y_tree     = 0.;
-	double particle_z_tree     = 0.;
 	double particle_t_tree     = 0.;
 	int    particle_pid_tree   = 0.;
 	
@@ -346,21 +477,27 @@ int main(int nargs, char* argv[])
 	std::vector<dirc_point> sim_points_pion;
 	std::vector<dirc_point> sim_points_kaon;
 
+	std::vector<dirc_point> sim_points_pion_inexact;
+	std::vector<dirc_point> sim_points_kaon_inexact;
+
 	std::vector<dirc_point> hit_points_pion;
 	std::vector<dirc_point> hit_points_kaon;
 
 	std::vector<dirc_point> tree_points;
+
+	TRandom3 rndm(rseed+3);
 
 	double ll_pion(0.),ll_kaon(0.);
 	double ll_pion_tree(0.),ll_kaon_tree(0.);
 
 	int counter = 0;
 
-	int locPID_bin = 0;
+	int locBin_PID = -1;
+	int locBin_P   = -1;
 
 	bool locGoodParticle = false;
 	
-	printf("\n\n Total Entries = %d\n",event_chain->GetEntries());
+	printf("\n\n Total Entries = %d\n",int(event_chain->GetEntries()));
 
 	//for (int event_i = 0 ; event_i < 15001 ; event_i++)
 	for (int event_i = 0 ; event_i < event_chain->GetEntries() ; event_i++)
@@ -383,10 +520,18 @@ int main(int nargs, char* argv[])
 		particle_phi_tree   = particle_p3_tree.Phi()*rad2deg; 
 		particle_x_tree     = particle_x3_tree.X();
 		particle_y_tree     = particle_x3_tree.Y(); 
-		particle_z_tree     = particle_x3_tree.Z(); 
+
+		for (size_t locPBin = 0; locPBin < PBins.size(); locPBin++)
+		{
+			if (particle_mom_tree > PBins[locPBin][0] && particle_mom_tree < PBins[locPBin][1])
+				locBin_P = locPBin; 
+		}
+		if (locBin_P == -1)
+			continue;
+
 
 		//if (particle_mom_tree < 2.8 || particle_mom_tree > 3.2) continue;
-		if (particle_mom_tree < 3.5 || particle_mom_tree > 4.5) continue;
+		//if (particle_mom_tree < 3.5 || particle_mom_tree > 4.5) continue;
 		//if (particle_mom_tree < 4) continue;
 		//if (particle_mom_tree > 3) continue;
 
@@ -394,9 +539,9 @@ int main(int nargs, char* argv[])
 		//if (particle_y_tree > -19.1158 || particle_y_tree < -22.6158) continue;//bar 3
 
 		if (abs(particle_pid_tree)==211)
-			locPID_bin = 1;
+			locBin_PID = 0;
 		else if (abs(particle_pid_tree)==321)
-			locPID_bin = 2;
+			locBin_PID = 1;
 		else
 			continue;
 
@@ -440,46 +585,96 @@ int main(int nargs, char* argv[])
 		/************   Generate FastDIRC-predicted Hits Given Particle Kinematics  ******************/
 		/*********************************************************************************************/
 
-                dirc_model_truth->sim_rand_n_photons(\
-                                sim_points_pion,\
-                                n_sim_phots,\
-                                -1,\
-                                particle_bar,\
-                                particle_x,\
-                                particle_y,\
-                                0.,\
-                                particle_theta,\
-                                particle_phi,\
-                                0.,\
-                                ckov_unc/1.,\
-                                pion_beta);
-                digitizer.digitize_points(sim_points_pion);
+		if (locBin_PID == 0)
+		{
+			dirc_model_truth->sim_rand_n_photons(\
+					sim_points_pion_inexact,\
+					n_sim_phots,\
+					-1,\
+					particle_bar,\
+					particle_x,\
+					particle_y,\
+					0.,\
+					particle_theta,\
+					particle_phi,\
+					0.,\
+					ckov_unc/1.,\
+					pion_beta);
+			digitizer.digitize_points(sim_points_pion_inexact);
+
+			dirc_model_used->sim_rand_n_photons(\
+					sim_points_pion,\
+					n_sim_phots,\
+					-1,\
+					particle_bar,\
+					particle_x,\
+					particle_y,\
+					0.,\
+					particle_theta,\
+					particle_phi,\
+					0.,\
+					ckov_unc/1.,\
+					pion_beta);
+			digitizer.digitize_points(sim_points_pion);
 
 
-                dirc_model_truth->sim_rand_n_photons(\
-                                sim_points_kaon,\
-                                n_sim_phots,\
-                                -1,\
-                                particle_bar,\
-                                particle_x,\
-                                particle_y,\
-                                0.,\
-                                particle_theta,\
-                                particle_phi,\
-                                0.,\
-                                ckov_unc/1.,\
-                                kaon_beta);
-                digitizer.digitize_points(sim_points_kaon);
 
+		}
+
+		if (locBin_PID == 1)
+		{
+			dirc_model_truth->sim_rand_n_photons(\
+					sim_points_kaon_inexact,\
+					n_sim_phots,\
+					-1,\
+					particle_bar,\
+					particle_x,\
+					particle_y,\
+					0.,\
+					particle_theta,\
+					particle_phi,\
+					0.,\
+					ckov_unc/1.,\
+					kaon_beta);
+			digitizer.digitize_points(sim_points_kaon_inexact);
+
+			dirc_model_used->sim_rand_n_photons(\
+					sim_points_kaon,\
+					n_sim_phots,\
+					-1,\
+					particle_bar,\
+					particle_x,\
+					particle_y,\
+					0.,\
+					particle_theta,\
+					particle_phi,\
+					0.,\
+					ckov_unc/1.,\
+					kaon_beta);
+			digitizer.digitize_points(sim_points_kaon);
+
+		}
+
+		// Add random noise
+		for (int loc_i = 0 ; loc_i < Nrandom_points ; loc_i++)
+		{
+			dirc_point random_point;
+			digitizer.get_random_point(random_point);
+			if (locBin_PID == 0)
+				sim_points_pion_inexact.push_back(random_point);
+			if (locBin_PID == 1)
+				sim_points_kaon_inexact.push_back(random_point);
+
+		}
 
         	double x,y,t_ns;
         	int pixel_row;
-        	for (unsigned int i = 0; i < sim_points_pion.size(); i++)
+        	for (unsigned int i = 0; i < sim_points_pion_inexact.size(); i++)
         	{
-                	x = sim_points_pion[i].x;
-               		y = sim_points_pion[i].y;
-                	t_ns = sim_points_pion[i].t;
-                	pixel_row = sim_points_pion[i].pixel_row;
+                	x = sim_points_pion_inexact[i].x;
+               		y = sim_points_pion_inexact[i].y;
+                	t_ns = sim_points_pion_inexact[i].t;
+                	pixel_row = sim_points_pion_inexact[i].pixel_row;
                 	if (pixel_row<0) continue;
                 	pion_dist_x->Fill(x);
                 	pion_dist_y->Fill(y);
@@ -489,16 +684,16 @@ int main(int nargs, char* argv[])
                 	pion_dist_yt->Fill(y,t_ns);
                 	pion_dist_t->Fill(t_ns);
 
-                	pion_dist_rowcol->Fill(sim_points_pion[i].pixel_row,sim_points_pion[i].pixel_col);
-                	pion_dist_3D->Fill(sim_points_pion[i].pixel_row,sim_points_pion[i].pixel_col,t_ns);
+                	pion_dist_rowcol->Fill(sim_points_pion_inexact[i].pixel_row,sim_points_pion_inexact[i].pixel_col);
+                	pion_dist_3D->Fill(sim_points_pion_inexact[i].pixel_row,sim_points_pion_inexact[i].pixel_col,t_ns);
         	}
-		for (unsigned int i = 0; i < sim_points_kaon.size(); i++)
+		for (unsigned int i = 0; i < sim_points_kaon_inexact.size(); i++)
 		{
-			x = sim_points_kaon[i].x;
-			y = sim_points_kaon[i].y;
-			t_ns = sim_points_kaon[i].t;
-			pixel_row = sim_points_kaon[i].pixel_row;
-			if (SIM_ONLY && pixel_row<0) continue;
+			x = sim_points_kaon_inexact[i].x;
+			y = sim_points_kaon_inexact[i].y;
+			t_ns = sim_points_kaon_inexact[i].t;
+			pixel_row = sim_points_kaon_inexact[i].pixel_row;
+			if (pixel_row<0) continue;
 			kaon_dist_x->Fill(x);
 			kaon_dist_y->Fill(y);
 			kaon_dist_t->Fill(t_ns);
@@ -507,17 +702,15 @@ int main(int nargs, char* argv[])
 			kaon_dist_yt->Fill(y,t_ns);
 			kaon_dist_t->Fill(t_ns);
 
-			kaon_dist_rowcol->Fill(sim_points_kaon[i].pixel_row,sim_points_kaon[i].pixel_col);
-                	kaon_dist_3D->Fill(sim_points_kaon[i].pixel_row,sim_points_kaon[i].pixel_col,t_ns);
+			kaon_dist_rowcol->Fill(sim_points_kaon_inexact[i].pixel_row,sim_points_kaon_inexact[i].pixel_col);
+                	kaon_dist_3D->Fill(sim_points_kaon_inexact[i].pixel_row,sim_points_kaon_inexact[i].pixel_col,t_ns);
 		}
-
-
 
 		/*********************************************************************************/
 		/************      Generate PDFs Given Particle Kinematics      ******************/
 		/*********************************************************************************/
 
-	        dirc_model_truth->sim_reg_n_photons(\
+	        dirc_model_used->sim_reg_n_photons(\
         	                hit_points_pion,\
                 	        n_phi_phots,\
                         	n_z_phots,\
@@ -533,7 +726,7 @@ int main(int nargs, char* argv[])
                         	pion_beta,\
                         	-1);
  
-		dirc_model_truth->sim_reg_n_photons(\
+		dirc_model_used->sim_reg_n_photons(\
 				hit_points_kaon,\
 				n_phi_phots,\
 				n_z_phots,\
@@ -573,27 +766,66 @@ int main(int nargs, char* argv[])
 
 		ll_diff_tree->Fill(1*(ll_pion_tree-ll_kaon_tree));
 
-		if (locPID_bin == 1)
+		if (locBin_PID == 0)
+		{
 			ll_diff_pion_tree->Fill(1*(ll_pion_tree-ll_kaon_tree));
-		if (locPID_bin == 2)
+			histMap_ll_diff_pion_tree[locBin_P]->Fill(1*(ll_pion_tree-ll_kaon_tree));
+			histMap_Nhits_pion_tree[locBin_P]->Fill(int(tree_points.size()));
+		}
+		if (locBin_PID == 1)
+		{
 			ll_diff_kaon_tree->Fill(1*(ll_pion_tree-ll_kaon_tree));
-
+			histMap_ll_diff_kaon_tree[locBin_P]->Fill(1*(ll_pion_tree-ll_kaon_tree));
+			histMap_Nhits_kaon_tree[locBin_P]->Fill(int(tree_points.size()));
+		}
 		//generated hits
+		// if we know the PDF exactly
 		ll_pion = pdf_pion->get_log_likelihood(sim_points_pion);
 		ll_kaon = pdf_kaon->get_log_likelihood(sim_points_pion);
-		ll_diff_pion->Fill(1*(ll_pion-ll_kaon));
+		if (locBin_PID == 0)
+		{
+			ll_diff_pion->Fill(1*(ll_pion-ll_kaon));
+			histMap_ll_diff_pion_sim_exact[locBin_P]->Fill(1*(ll_pion-ll_kaon));
 
+		}
 		ll_pion = pdf_pion->get_log_likelihood(sim_points_kaon);
 		ll_kaon = pdf_kaon->get_log_likelihood(sim_points_kaon);
-		ll_diff_kaon->Fill(1*(ll_pion-ll_kaon));
+		if (locBin_PID == 1)
+		{
+			ll_diff_kaon->Fill(1*(ll_pion-ll_kaon));
+			histMap_ll_diff_kaon_sim_exact[locBin_P]->Fill(1*(ll_pion-ll_kaon));
+		}
+		// if 1) we don't know the geometry exactly, 2)additional hits etc.
+		ll_pion = pdf_pion->get_log_likelihood(sim_points_pion_inexact);
+		ll_kaon = pdf_kaon->get_log_likelihood(sim_points_pion_inexact);
+		if (locBin_PID == 0)
+		{
+			ll_diff_pion_inexact->Fill(1*(ll_pion-ll_kaon));
+			Nph_pion -> Fill(int(sim_points_pion_inexact.size()));
+			histMap_ll_diff_pion_sim_inexact[locBin_P]->Fill(1*(ll_pion-ll_kaon));
+			histMap_Nhits_pion_sim_inexact[locBin_P]->Fill(int(sim_points_pion_inexact.size()));
+		}
+
+		ll_pion = pdf_pion->get_log_likelihood(sim_points_kaon_inexact);
+		ll_kaon = pdf_kaon->get_log_likelihood(sim_points_kaon_inexact);
+		if (locBin_PID == 1)
+		{
+			ll_diff_kaon_inexact->Fill(1*(ll_pion-ll_kaon));
+			Nph_kaon -> Fill(int(sim_points_kaon_inexact.size()));
+			histMap_ll_diff_kaon_sim_inexact[locBin_P]->Fill(1*(ll_pion-ll_kaon));
+			histMap_Nhits_kaon_sim_inexact[locBin_P]->Fill(int(sim_points_kaon_inexact.size()));
+		}
 
 
-
+		sim_points_pion.clear();
+		sim_points_kaon.clear();
+		sim_points_pion_inexact.clear();
+		sim_points_kaon_inexact.clear();
 		tree_points.clear();
 		delete pdf_pion;
 		delete pdf_kaon;
 	
-	}
+	}// END OF PARTICLE LOOP
 
 	}// END OF EVENT_CHAIN LOOP
 
@@ -623,19 +855,41 @@ int main(int nargs, char* argv[])
 	kaon_dist_t->Write();
 	kaon_dist_rowcol->Write();
 
-        ll_diff_pion->Write();
-        ll_diff_kaon->Write();
         phot_found_pion->Write();
         phot_found_kaon->Write();
 
 	hit_dist_rowcol_tree->Write();
 	hit_dist_t_tree->Write();
 
+	Nph_tree -> Write();
+	Nph_pion -> Write();
+	Nph_kaon -> Write();
+
+
+        ll_diff_pion->Write();
+        ll_diff_kaon->Write();
+
+        ll_diff_pion_inexact->Write();
+        ll_diff_kaon_inexact->Write();
+
         ll_diff_tree->Write();
         ll_diff_pion_tree->Write();
         ll_diff_kaon_tree->Write();
-	
-	Nph_tree -> Write();
+
+	for (size_t locPBin = 0 ; locPBin < PBins.size() ; locPBin++)
+	{
+		histMap_ll_diff_pion_tree[locPBin]->Write();
+		histMap_ll_diff_kaon_tree[locPBin]->Write();
+		histMap_ll_diff_pion_sim_exact[locPBin]->Write();
+		histMap_ll_diff_kaon_sim_exact[locPBin]->Write();
+		histMap_ll_diff_pion_sim_inexact[locPBin]->Write();
+		histMap_ll_diff_kaon_sim_inexact[locPBin]->Write();
+
+		histMap_Nhits_pion_tree[locPBin]->Write();
+		histMap_Nhits_kaon_tree[locPBin]->Write();
+		histMap_Nhits_pion_sim_inexact[locPBin]->Write();
+		histMap_Nhits_kaon_sim_inexact[locPBin]->Write();
+	}	
 
 	tfile->Close();
 

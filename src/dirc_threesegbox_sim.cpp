@@ -64,7 +64,10 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	quartzIndex = 1.47;
 	liquidIndex = 1.47;
 	quartzLiquidY = wedgeHeight + windowThickness;
-	
+
+	focMirrorTop  = 0.;
+	focMirrorZDim = 0.;
+	seg_h         = 0.; 	
 
 	//boxCloseZ = -614;
 	//boxCloseZ = -559;

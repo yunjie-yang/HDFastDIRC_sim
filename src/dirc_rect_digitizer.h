@@ -56,5 +56,6 @@ public:
 	void undigitize_point(dirc_point &pt);
 	void undigitize_points(std::vector<dirc_point> &points);
 	
+	void get_random_point(dirc_point &pt);
 };
 #endif

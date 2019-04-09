@@ -8,7 +8,8 @@ CFLAGS = $(CFLAGS_BASE) $(goptical_CPPFLAGS)
 LIBLOC = ./lib
 #OUT = ./hdfastdirc_sim
 #OUT = ./hdfastdirc
-OUT = ./hdfastdirc_treeInput
+#OUT = ./hdfastdirc_treeInput
+OUT = ./hdfastdirc_experiments
 
 OBJFILES = dirc_base_sim.o
 OBJFILES += dirc_threesegbox_sim.o
