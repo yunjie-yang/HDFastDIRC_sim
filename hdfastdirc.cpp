@@ -279,10 +279,19 @@ int main(int nargs, char* argv[])
 						 bar_box_yoff,\
 						 bar_box_zoff);
 
-	//dirc_model->set_geometry_outfile(geometry_outfilename);
-	//dirc_model->print_model();
+	dirc_model->set_geometry_outfile(geometry_outfilename);
+	dirc_model->print_model();
 
 	printf("\n DIRC model all set. Begin running.\n");
+
+
+	particle_bar     =     4.00; 
+	energy           =     5.00;
+	particle_theta   =     1.20;
+	particle_phi     =   293.50;
+	particle_x       =     7.19;
+	particle_y       = -2289.90;
+
 
 	/**************************************************************************/
 	/***********                      STEP 1               ********************/

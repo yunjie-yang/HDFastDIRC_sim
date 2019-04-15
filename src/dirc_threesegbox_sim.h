@@ -24,8 +24,13 @@ protected:
 	double largePlanarMirrorD;
 	double largePlanarMirrorMinZ;
 	double largePlanarMirrorMaxZ;
+
 	double pmtPlaneMinZ;
 	double pmtPlaneMaxZ;
+
+	double pmtPlane_xl;
+	double pmtPlane_xr;
+
 
 	double upperWedgeMirrorTop;
 	double largePlanarMirrorY;
@@ -84,6 +89,25 @@ protected:
 
 	double focYoff;
 	double focZoff;
+
+	double focYoff_threeSeg1;
+	double focZoff_threeSeg1;
+
+	double focYoff_threeSeg2;
+	double focZoff_threeSeg2;
+
+	double focYoff_threeSeg3;
+	double focZoff_threeSeg3;
+
+	double foc_yrot_threeSeg1;
+	double foc_zrot_threeSeg1;
+
+	double foc_yrot_threeSeg2;
+	double foc_zrot_threeSeg2;
+
+	double foc_yrot_threeSeg3;
+	double foc_zrot_threeSeg3;
+
 
 	double sensPlaneYdistConversion;
 	double sensPlaneZdistConversion;

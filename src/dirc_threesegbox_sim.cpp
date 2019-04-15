@@ -52,6 +52,9 @@ DircThreeSegBoxSim::DircThreeSegBoxSim(
 	pmtPlaneMaxZ = -329;
 	//pmtPlaneMaxZ = -346;
 
+	pmtPlane_xl = -924.516;
+	pmtPlane_xr = 24.904;
+
 	focMirrorBottom = 139 + upperWedgeTop + barLength/2;
 
 	focPlaneNx = 0;
@@ -175,85 +178,94 @@ void DircThreeSegBoxSim::print_model()
 	printf("           DIRC GEOMETRY:            \n\n");
 
 	printf("    Bar Box:\n");
-	printf("  Bar Length (mm): %12.04f\n",barLength);output_csv<<"barLength\t"<<barLength<<"\n";
-	printf("  Bar Width  (mm): %12.04f\n",barWidth);output_csv<<"barWidth\t"<<barWidth<<"\n";
-	printf("  Bar Depth  (mm): %12.04f\n",barDepth);output_csv<<"barDepth\t"<<barDepth<<"\n";
-	printf("  xoff       (mm): %12.04f\n",bar_box_xoff);output_csv<<"bar_box_xoff\t"<<bar_box_xoff<<"\n";
-	printf("  yoff       (mm): %12.04f\n",bar_box_yoff);output_csv<<"bar_box_yoff\t"<<bar_box_yoff<<"\n";
-	printf("  zoff       (mm): %12.04f\n",bar_box_zoff);output_csv<<"bar_box_zoff\t"<<bar_box_zoff<<"\n";
+	printf("  Bar Length (mm): %12.04f\n",barLength);output_csv<<"barLength \t "<<barLength<<"\n";
+	printf("  Bar Width  (mm): %12.04f\n",barWidth);output_csv<<"barWidth \t "<<barWidth<<"\n";
+	printf("  Bar Depth  (mm): %12.04f\n",barDepth);output_csv<<"barDepth \t "<<barDepth<<"\n";
+	printf("  xoff       (mm): %12.04f\n",bar_box_xoff);output_csv<<"bar_box_xoff \t "<<bar_box_xoff<<"\n";
+	printf("  yoff       (mm): %12.04f\n",bar_box_yoff);output_csv<<"bar_box_yoff \t "<<bar_box_yoff<<"\n";
+	printf("  zoff       (mm): %12.04f\n",bar_box_zoff);output_csv<<"bar_box_zoff \t "<<bar_box_zoff<<"\n";
 
 	printf("\n\n    Wedge:\n");
-	printf("  upperWedgeTop        (mm): %12.04f\n",upperWedgeTop);output_csv<<"upperWedgeTop\t"<<upperWedgeTop<<"\n";
-	printf("  upperWedgeBottom     (mm): %12.04f\n",upperWedgeBottom);output_csv<<"upperWedgeBottom\t"<<upperWedgeBottom<<"\n";
-	printf("  upperWedgeHeight     (mm): %12.04f\n",upperWedgeHeight);output_csv<<"upperWedgeHeight\t"<<upperWedgeHeight<<"\n";
-	printf("  upperWedgeDepthHigh  (mm): %12.04f\n",upperWedgeDepthHigh);output_csv<<"upperWedgeDepthHigh\t"<<upperWedgeDepthHigh<<"\n";
-	printf("  upperWedgeGap        (mm): %12.04f\n",upperWedgeGap);output_csv<<"upperWedgeGap\t"<<upperWedgeGap<<"\n";
-	printf("  upperWedgeFarZ       (mm): %12.04f\n",upperWedgeFarZ);output_csv<<"upperWedgeFarZ\t"<<upperWedgeFarZ<<"\n";
-	printf("  wedgeTop             (mm): %12.04f\n",wedgeTop);output_csv<<"wedgeTop\t"<<wedgeTop<<"\n";
-	printf("  wedgeWidthOff        (mm): %12.04f\n",wedgeWidthOff);output_csv<<"wedgeWidthOff\t"<<wedgeWidthOff<<"\n";
-	printf("  wedgeDepthOff        (mm): %12.04f\n",wedgeDepthOff);output_csv<<"wedgeDepthOff\t"<<wedgeDepthOff<<"\n";
-	printf("  wedgeFarAngle       (deg): %12.04f\n",wedgeFarAngle);output_csv<<"wedgeFarAngle\t"<<wedgeFarAngle<<"\n";
-	printf("  wedgeCloseAngle     (deg): %12.04f\n",wedgeCloseAngle);output_csv<<"wedgeCloseAngle\t"<<wedgeCloseAngle<<"\n";
-	printf("  wedgeWidth           (mm): %12.04f\n",wedgeWidth);output_csv<<"wedgeWidth\t"<<wedgeWidth<<"\n";
-	printf("  wedgeHeight          (mm): %12.04f\n",wedgeHeight);output_csv<<"wedgeHeight\t"<<wedgeHeight<<"\n";
-	printf("  wedgeDepthHigh       (mm): %12.04f\n",wedgeDepthHigh);output_csv<<"wedgeDepthHigh\t"<<wedgeDepthHigh<<"\n";
-	printf("  lowerWedgeExtensionZ (mm): %12.04f\n",lowerWedgeExtensionZ);output_csv<<"lowerWedgeExtensionZ\t"<<lowerWedgeExtensionZ<<"\n";
-	printf("  windowThickness      (mm): %12.04f\n",windowThickness);output_csv<<"windowThickness\t"<<windowThickness<<"\n";
-	printf("  upperWedgeMirrorTop  (mm): %12.04f\n",focMirrorBottom);output_csv<<"upperWedgeMirrorTop\t"<<focMirrorBottom<<"\n";
+	printf("  upperWedgeTop        (mm): %12.04f\n",upperWedgeTop);output_csv<<"upperWedgeTop \t "<<upperWedgeTop<<"\n";
+	printf("  upperWedgeBottom     (mm): %12.04f\n",upperWedgeBottom);output_csv<<"upperWedgeBottom \t "<<upperWedgeBottom<<"\n";
+	printf("  upperWedgeHeight     (mm): %12.04f\n",upperWedgeHeight);output_csv<<"upperWedgeHeight \t "<<upperWedgeHeight<<"\n";
+	printf("  upperWedgeDepthHigh  (mm): %12.04f\n",upperWedgeDepthHigh);output_csv<<"upperWedgeDepthHigh \t "<<upperWedgeDepthHigh<<"\n";
+	printf("  upperWedgeGap        (mm): %12.04f\n",upperWedgeGap);output_csv<<"upperWedgeGap \t "<<upperWedgeGap<<"\n";
+	printf("  upperWedgeFarZ       (mm): %12.04f\n",upperWedgeFarZ);output_csv<<"upperWedgeFarZ \t "<<upperWedgeFarZ<<"\n";
+	printf("  wedgeTop             (mm): %12.04f\n",wedgeTop);output_csv<<"wedgeTop \t "<<wedgeTop<<"\n";
+	printf("  wedgeWidthOff        (mm): %12.04f\n",wedgeWidthOff);output_csv<<"wedgeWidthOff \t "<<wedgeWidthOff<<"\n";
+	printf("  wedgeDepthOff        (mm): %12.04f\n",wedgeDepthOff);output_csv<<"wedgeDepthOff \t "<<wedgeDepthOff<<"\n";
+	printf("  wedgeFarAngle       (deg): %12.04f\n",wedgeFarAngle);output_csv<<"wedgeFarAngle \t "<<wedgeFarAngle<<"\n";
+	printf("  wedgeCloseAngle     (deg): %12.04f\n",wedgeCloseAngle);output_csv<<"wedgeCloseAngle \t "<<wedgeCloseAngle<<"\n";
+	printf("  wedgeWidth           (mm): %12.04f\n",wedgeWidth);output_csv<<"wedgeWidth \t "<<wedgeWidth<<"\n";
+	printf("  wedgeHeight          (mm): %12.04f\n",wedgeHeight);output_csv<<"wedgeHeight \t "<<wedgeHeight<<"\n";
+	printf("  wedgeDepthHigh       (mm): %12.04f\n",wedgeDepthHigh);output_csv<<"wedgeDepthHigh \t "<<wedgeDepthHigh<<"\n";
+	printf("  lowerWedgeExtensionZ (mm): %12.04f\n",lowerWedgeExtensionZ);output_csv<<"lowerWedgeExtensionZ \t "<<lowerWedgeExtensionZ<<"\n";
+	printf("  windowThickness      (mm): %12.04f\n",windowThickness);output_csv<<"windowThickness \t "<<windowThickness<<"\n";
+	printf("  upperWedgeMirrorTop  (mm): %12.04f\n",upperWedgeMirrorTop);output_csv<<"upperWedgeMirrorTop \t "<<upperWedgeMirrorTop<<"\n";
+	printf("  quartzLiquidY        (mm): %12.04f\n",quartzLiquidY);output_csv<<"quartzLiquidY \t "<<quartzLiquidY<<"\n";
 
 	printf("\n\n    Optical Box:\n\n");
 
 	printf("\n   three-seg mirror:\n");
 	printf("  in place             : %12d\n",three_seg_mirror);
-	printf("  rot             (deg): %12.04f\n",foc_rot);output_csv<<"foc_rot\t"<<foc_rot<<"\n";
-	printf("  focMirrorTop     (mm): %12.04f\n",focMirrorTop);output_csv<<"focMirrorTop\t"<<focMirrorTop<<"\n";
-	printf("  focMirrorBottom  (mm): %12.04f\n",focMirrorBottom);output_csv<<"focMirrorBottom\t"<<focMirrorBottom<<"\n";
-	printf("  focMirrorZDim    (mm): %12.04f\n",focMirrorZDim);output_csv<<"focMirrorZDim\t"<<focMirrorZDim<<"\n";
-	printf("  theta_1  (deg): %12.04f\n",threeSeg_theta_1*rad2deg);output_csv<<"threeSeg_theta_1\t"<<threeSeg_theta_1*rad2deg<<"\n";
-	printf("  theta_2  (deg): %12.04f\n",threeSeg_theta_2*rad2deg);output_csv<<"threeSeg_theta_2\t"<<threeSeg_theta_2*rad2deg<<"\n";
-	printf("  theta_3  (deg): %12.04f\n",threeSeg_theta_3*rad2deg);output_csv<<"threeSeg_theta_3\t"<<threeSeg_theta_3*rad2deg<<"\n";
-	printf("  seg_h     (mm): %12.04f\n",seg_h);output_csv<<"seg_h\t"<<seg_h<<"\n";
-	printf("  seg1Y     (mm): %12.04f\n",threeSeg1Y);output_csv<<"threeSeg1Y \t "<<threeSeg1Y<<"\n";
-	printf("  seg1Z     (mm): %12.04f\n",threeSeg1Z);output_csv<<"threeSeg1Z \t "<<threeSeg1Z<<"\n";
-	printf("  seg1Y_end (mm): %12.04f\n",threeSeg1Y_end);output_csv<<"threeSeg1Y_end \t "<<threeSeg1Y_end<<"\n";
-	printf("  seg1Z_end (mm): %12.04f\n",threeSeg1Z_end);output_csv<<"threeSeg1Z_end \t "<<threeSeg1Z_end<<"\n";
-	printf("  seg2Y     (mm): %12.04f\n",threeSeg2Y);output_csv<<"threeSeg2Y \t "<<threeSeg2Y<<"\n";
-	printf("  seg2Z     (mm): %12.04f\n",threeSeg2Z);output_csv<<"threeSeg2Z \t "<<threeSeg2Z<<"\n";
-	printf("  seg2Y_end (mm): %12.04f\n",threeSeg2Y_end);output_csv<<"threeSeg2Y_end \t "<<threeSeg2Y_end<<"\n";
-	printf("  seg2Z_end (mm): %12.04f\n",threeSeg2Z_end);output_csv<<"threeSeg2Z_end \t "<<threeSeg2Z_end<<"\n";
-	printf("  seg3Y     (mm): %12.04f\n",threeSeg3Y);output_csv<<"threeSeg3Y \t "<<threeSeg3Y<<"\n";
-	printf("  seg3Z     (mm): %12.04f\n",threeSeg3Z);output_csv<<"threeSeg3Z \t "<<threeSeg3Z<<"\n";
-	printf("  seg3Y_end (mm): %12.04f\n",threeSeg3Y_end);output_csv<<"threeSeg3Y_end \t "<<threeSeg3Y_end<<"\n";
-	printf("  seg3Z_end (mm): %12.04f\n",threeSeg3Z_end);output_csv<<"threeSeg3Z_end \t "<<threeSeg3Z_end<<"\n";
-	printf("  Yoff      (mm): %12.04f\n",focYoff);output_csv<<"focYoff\t"<<focYoff<<"\n";
-	printf("  Zoff      (mm): %12.04f\n",focZoff);output_csv<<"focZoff\t"<<focZoff<<"\n";
-	printf("  Yrot     (deg): %12.04f\n",foc_yrot);output_csv<<"foc_yrot\t"<<foc_yrot<<"\n";
-	printf("  Zrot     (deg): %12.04f\n",foc_zrot);output_csv<<"foc_zrot\t"<<foc_zrot<<"\n";
-	printf("  size      (mm): %12.04f\n",foc_mirror_size);output_csv<<"foc_mirror_size\t"<<foc_mirror_size<<"\n";
-	printf("  r         (mm): %12.04f\n",foc_r);output_csv<<"foc_r\t"<<foc_r<<"\n";
+	printf("  rot             (deg): %12.04f\n",foc_rot);output_csv<<"foc_rot \t "<<foc_rot<<"\n";
+	printf("  focMirrorTop     (mm): %12.04f\n",focMirrorTop);output_csv<<"focMirrorTop \t "<<focMirrorTop<<"\n";
+	printf("  focMirrorBottom  (mm): %12.04f\n",focMirrorBottom);output_csv<<"focMirrorBottom \t "<<focMirrorBottom<<"\n";
+	printf("  focMirrorZDim    (mm): %12.04f\n",focMirrorZDim);output_csv<<"focMirrorZDim \t "<<focMirrorZDim<<"\n";
+	printf("  theta_1   (deg): %12.04f\n",threeSeg_theta_1*rad2deg);output_csv<<"threeSeg_theta_1 \t "<<threeSeg_theta_1*rad2deg<<"\n";
+	printf("  theta_2   (deg): %12.04f\n",threeSeg_theta_2*rad2deg);output_csv<<"threeSeg_theta_2 \t "<<threeSeg_theta_2*rad2deg<<"\n";
+	printf("  theta_3   (deg): %12.04f\n",threeSeg_theta_3*rad2deg);output_csv<<"threeSeg_theta_3 \t "<<threeSeg_theta_3*rad2deg<<"\n";
+	printf("  seg_h      (mm): %12.04f\n",seg_h);output_csv<<"seg_h \t "<<seg_h<<"\n";
+	printf("  seg1Y      (mm): %12.04f\n",threeSeg1Y);output_csv<<"threeSeg1Y \t "<<threeSeg1Y<<"\n";
+	printf("  seg1Z      (mm): %12.04f\n",threeSeg1Z);output_csv<<"threeSeg1Z \t "<<threeSeg1Z<<"\n";
+	printf("  seg1Y_end  (mm): %12.04f\n",threeSeg1Y_end);output_csv<<"threeSeg1Y_end \t "<<threeSeg1Y_end<<"\n";
+	printf("  seg1Z_end  (mm): %12.04f\n",threeSeg1Z_end);output_csv<<"threeSeg1Z_end \t "<<threeSeg1Z_end<<"\n";
+	printf("  seg2Y      (mm): %12.04f\n",threeSeg2Y);output_csv<<"threeSeg2Y \t "<<threeSeg2Y<<"\n";
+	printf("  seg2Z      (mm): %12.04f\n",threeSeg2Z);output_csv<<"threeSeg2Z \t "<<threeSeg2Z<<"\n";
+	printf("  seg2Y_end  (mm): %12.04f\n",threeSeg2Y_end);output_csv<<"threeSeg2Y_end \t "<<threeSeg2Y_end<<"\n";
+	printf("  seg2Z_end  (mm): %12.04f\n",threeSeg2Z_end);output_csv<<"threeSeg2Z_end \t "<<threeSeg2Z_end<<"\n";
+	printf("  seg3Y      (mm): %12.04f\n",threeSeg3Y);output_csv<<"threeSeg3Y \t "<<threeSeg3Y<<"\n";
+	printf("  seg3Z      (mm): %12.04f\n",threeSeg3Z);output_csv<<"threeSeg3Z \t "<<threeSeg3Z<<"\n";
+	printf("  seg3Y_end  (mm): %12.04f\n",threeSeg3Y_end);output_csv<<"threeSeg3Y_end \t "<<threeSeg3Y_end<<"\n";
+	printf("  seg3Z_end  (mm): %12.04f\n",threeSeg3Z_end);output_csv<<"threeSeg3Z_end \t "<<threeSeg3Z_end<<"\n";
+	printf("  Yoff       (mm): %12.04f\n",focYoff);output_csv<<"focYoff \t "<<focYoff<<"\n";
+	printf("  Zoff       (mm): %12.04f\n",focZoff);output_csv<<"focZoff \t "<<focZoff<<"\n";
+	printf("  Yrot      (deg): %12.04f\n",foc_yrot);output_csv<<"foc_yrot \t "<<foc_yrot<<"\n";
+	printf("  Zrot      (deg): %12.04f\n",foc_zrot);output_csv<<"foc_zrot \t "<<foc_zrot<<"\n";
+	printf("  Yrot_seg1 (deg): %12.04f\n",foc_yrot_threeSeg1);output_csv<<"foc_yrot_threeSeg1 \t "<<foc_yrot_threeSeg1<<"\n";
+	printf("  Zrot_seg1 (deg): %12.04f\n",foc_zrot_threeSeg1);output_csv<<"foc_zrot_threeSeg1 \t "<<foc_zrot_threeSeg1<<"\n";
+	printf("  Yrot_seg2 (deg): %12.04f\n",foc_yrot_threeSeg2);output_csv<<"foc_yrot_threeSeg2 \t "<<foc_yrot_threeSeg2<<"\n";
+	printf("  Zrot_seg2 (deg): %12.04f\n",foc_zrot_threeSeg2);output_csv<<"foc_zrot_threeSeg2 \t "<<foc_zrot_threeSeg2<<"\n";
+	printf("  Yrot_seg3 (deg): %12.04f\n",foc_yrot_threeSeg3);output_csv<<"foc_yrot_threeSeg3 \t "<<foc_yrot_threeSeg3<<"\n";
+	printf("  Zrot_seg3 (deg): %12.04f\n",foc_zrot_threeSeg3);output_csv<<"foc_zrot_threeSeg3 \t "<<foc_zrot_threeSeg3<<"\n";
+	printf("  size       (mm): %12.04f\n",foc_mirror_size);output_csv<<"foc_mirror_size \t "<<foc_mirror_size<<"\n";
+	printf("  r          (mm): %12.04f\n",foc_r);output_csv<<"foc_r \t "<<foc_r<<"\n";
 
 	printf("\n   Big Flat Mirror:\n");
-	printf("  minZ  (mm): %12.04f\n",largePlanarMirrorMinZ);output_csv<<"largePlanarMirrorMinZ\t"<<largePlanarMirrorMinZ<<"\n";
-	printf("  maxZ  (mm): %12.04f\n",largePlanarMirrorMaxZ);output_csv<<"largePlanarMirrorMaxZ\t"<<largePlanarMirrorMaxZ<<"\n";
-	printf("  Y     (mm): %12.04f\n",largePlanarMirrorY);output_csv<<"largePlanarMirrorY\t"<<largePlanarMirrorY<<"\n";
+	printf("  minZ  (mm): %12.04f\n",largePlanarMirrorMinZ);output_csv<<"largePlanarMirrorMinZ \t "<<largePlanarMirrorMinZ<<"\n";
+	printf("  maxZ  (mm): %12.04f\n",largePlanarMirrorMaxZ);output_csv<<"largePlanarMirrorMaxZ \t "<<largePlanarMirrorMaxZ<<"\n";
+	printf("  Y     (mm): %12.04f\n",largePlanarMirrorY);output_csv<<"largePlanarMirrorY \t "<<largePlanarMirrorY<<"\n";
 
 	printf("\n   Side mirrors::\n");
-	printf("  xl (mm): %12.04f\n",sidemirror_xl);output_csv<<"sidemirror_xl\t"<<sidemirror_xl<<"\n";
-	printf("  xr (mm): %12.04f\n",sidemirror_xr);output_csv<<"sidemirror_xr\t"<<sidemirror_xr<<"\n";
+	printf("  xl (mm): %12.04f\n",sidemirror_xl);output_csv<<"sidemirror_xl \t "<<sidemirror_xl<<"\n";
+	printf("  xr (mm): %12.04f\n",sidemirror_xr);output_csv<<"sidemirror_xr \t "<<sidemirror_xr<<"\n";
 
 	printf("\n   PMT plane:\n");
-	printf("  rot             (deg): %12.04f\n",sens_rot);output_csv<<"sens_rot\t"<<sens_rot<<"\n";
-	printf("  Y                (mm): %12.04f\n",sensPlaneY);output_csv<<"sensPlaneY\t"<<sensPlaneY<<"\n";
-	printf("  Z                (mm): %12.04f\n",sensPlaneZ);output_csv<<"sensPlaneZ\t"<<sensPlaneZ<<"\n";
-	printf("  reflOff          (mm): %12.04f\n",reflOff);output_csv<<"reflOff\t"<<reflOff<<"\n";
-	printf("  minZ             (mm): %12.04f\n",pmtPlaneMinZ);output_csv<<"pmtPlaneMinZ\t"<<pmtPlaneMinZ<<"\n";
-	printf("  maxZ             (mm): %12.04f\n",pmtPlaneMaxZ);output_csv<<"pmtPlaneMaxZ\t"<<pmtPlaneMaxZ<<"\n";
-	printf("  boxCloseZ        (mm): %12.04f\n",boxCloseZ);output_csv<<"boxCloseZ\t"<<boxCloseZ<<"\n";
-	printf("  unReflSensPlaneY (mm): %12.04f\n",unReflSensPlaneY);output_csv<<"unReflSensPlaneY\t"<<unReflSensPlaneY<<"\n";
-	printf("  unReflSensPlaneZ (mm): %12.04f\n",unReflSensPlaneZ);output_csv<<"unReflSensPlaneZ\t"<<unReflSensPlaneZ<<"\n";
+	printf("  rot             (deg): %12.04f\n",sens_rot);output_csv<<"sens_rot \t "<<sens_rot<<"\n";
+	printf("  Y                (mm): %12.04f\n",sensPlaneY);output_csv<<"sensPlaneY \t "<<sensPlaneY<<"\n";
+	printf("  Z                (mm): %12.04f\n",sensPlaneZ);output_csv<<"sensPlaneZ \t "<<sensPlaneZ<<"\n";
+	printf("  reflOff          (mm): %12.04f\n",reflOff);output_csv<<"reflOff \t "<<reflOff<<"\n";
+	printf("  minZ             (mm): %12.04f\n",pmtPlaneMinZ);output_csv<<"pmtPlaneMinZ \t "<<pmtPlaneMinZ<<"\n";
+	printf("  maxZ             (mm): %12.04f\n",pmtPlaneMaxZ);output_csv<<"pmtPlaneMaxZ \t "<<pmtPlaneMaxZ<<"\n";
+	printf("  xl               (mm): %12.04f\n",pmtPlane_xl);output_csv<<"pmtPlane_xl \t "<<pmtPlane_xl<<"\n";
+	printf("  xr               (mm): %12.04f\n",pmtPlane_xr);output_csv<<"pmtPlane_xr \t "<<pmtPlane_xr<<"\n";
+	printf("  boxCloseZ        (mm): %12.04f\n",boxCloseZ);output_csv<<"boxCloseZ \t "<<boxCloseZ<<"\n";
+	printf("  unReflSensPlaneY (mm): %12.04f\n",unReflSensPlaneY);output_csv<<"unReflSensPlaneY \t "<<unReflSensPlaneY<<"\n";
+	printf("  unReflSensPlaneZ (mm): %12.04f\n",unReflSensPlaneZ);output_csv<<"unReflSensPlaneZ \t "<<unReflSensPlaneZ<<"\n";
 	printf("  sensPlaneY       (mm): %12.04f\n",sensPlaneY);output_csv<<"sensPlaneY \t "<<sensPlaneY<<"\n";
 	printf("  sensPlaneZ       (mm): %12.04f\n",sensPlaneZ);output_csv<<"sensPlaneZ \t "<<sensPlaneZ<<"\n";
-	printf("  size             (mm): %12.04f\n",sens_size);output_csv<<"sens_size\t"<<sens_size<<"\n";
+	printf("  size             (mm): %12.04f\n",sens_size);output_csv<<"sens_size \t "<<sens_size<<"\n";
 
 	printf("\n   END OF DIRC GEOMETRY PRINTOUT \n");
 	printf("*******************************************\n\n");
@@ -325,6 +337,14 @@ void DircThreeSegBoxSim::set_mirror_plane_offsets(double off_y, double off_z)
 {
 	focYoff = off_y;
 	focZoff = off_z;
+	
+	focYoff_threeSeg1 = focYoff;
+	focZoff_threeSeg1 = focZoff;
+	focYoff_threeSeg2 = focYoff;
+	focZoff_threeSeg2 = focZoff;
+	focYoff_threeSeg3 = focYoff;
+	focZoff_threeSeg3 = focZoff;
+
 	build_readout_box();
 }
 void DircThreeSegBoxSim::set_pmt_plane_zs(double imin, double imax)
@@ -533,6 +553,14 @@ void DircThreeSegBoxSim::set_focus_mirror_angle(double ang,double yang, double z
 	foc_rot = ang;
 	foc_yrot = yang;
 	foc_zrot = zang;
+
+	foc_yrot_threeSeg1 = foc_yrot;
+	foc_zrot_threeSeg1 = foc_zrot;
+	foc_yrot_threeSeg2 = foc_yrot;
+	foc_zrot_threeSeg2 = foc_zrot;
+	foc_yrot_threeSeg3 = foc_yrot;
+	foc_zrot_threeSeg3 = foc_zrot;
+
 	build_readout_box();
 }
 void DircThreeSegBoxSim::set_pmt_angle(double ang) {

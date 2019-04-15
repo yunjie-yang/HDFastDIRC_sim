@@ -1,6 +1,8 @@
 *.swp
 hdfastdirc_sim
 hdfastdirc
+hdfastdirc_treeInput
+hdfastdirc_experiments
 *.root
 root_outputs/*
 ./*.py
