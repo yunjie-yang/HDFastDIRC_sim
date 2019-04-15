@@ -1,5 +1,6 @@
 void recon_graphics()
 {
+
 	gStyle->SetOptStat(0);
 
 	string infile_dir   = "/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen";

@@ -275,7 +275,7 @@ int main(int nargs, char* argv[])
 						 bar_box_zoff);
 
 	dirc_model->set_geometry_outfile(geometry_outfilename);
-	//dirc_model->print_model();
+	dirc_model->print_model();
 
 	printf("\n DIRC model all set. \n");
 

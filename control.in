@@ -1,26 +1,13 @@
 SIM_ONLY 0 
 
- OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen/hist_data_tight.root'
- DIRCTREE_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/data_bggen/hd_root_60785_000.root'
-
-c DIRCTREE_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/data_bggen/hd_root_60785_000_002.root'
-
-c OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen/hist_data.root'
-c DIRCTREE_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/data_bggen/beam_tree_23_all.root'
-
-c OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen/hist_bggen.root'
-c DIRCTREE_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/data_bggen/bggen_tree_23_all.root'
-
-c OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen/hist_fastdirc.root'
-
-N_PHI_PHOTS 5000
-
-GEOMETRY_INFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/FastDIRC_HDDS_Nominal.csv'
-GEOMETRY_OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/data_bggen/dirc_model_used_geometry.csv'
+OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/geometry_tests/hist_HDDS_Nominal.root'
+GEOMETRY_INFILE   '/home/yunjiey/Documents/HDFastDIRC_sim/geometry_files/FastDIRC_HDDS_Nominal.csv'
+GEOMETRY_OUTFILE  '/media/sf_SharedFolderVM/FastDIRC_geometry/outputs/geometry_tests/dirc_model_used_HDDS_Nominal.csv'
 
 PARTICLE_BAR  3.0
 PARTICLE_THETA  1.2
 PARTICLE_PHI  113.5
 PARTICLE_X  180.20000
 PARTICLE_Y  -25.10000
+
 END 
